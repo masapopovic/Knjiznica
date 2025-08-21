@@ -3,10 +3,9 @@ CREATE TABLE clan (
     ime TEXT NOT NULL,
     priimek TEXT NOT NULL,
     uporabnisko_ime TEXT UNIQUE NOT NULL,
-    geslo TEXT NOT NULL,     -- shraniš hash
+    geslo TEXT NOT NULL,     
     email TEXT UNIQUE NOT NULL,
-    telefon CHAR(20),
-    status CHAR(10) DEFAULT 'aktiven'
+    status_clana TEXT NOT NULL CHECK (status_clana IN ('aktiven', 'neaktiven'))
 );
 
 CREATE TABLE knjiga (
