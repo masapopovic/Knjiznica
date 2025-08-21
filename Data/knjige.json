@@ -1,0 +1,1102 @@
+[
+    {
+        "naslov": "To Kill a Mockingbird",
+        "ime_avtorja": "Harper",
+        "priimek_avtorja": "Lee",
+        "žanri": [
+            "classics",
+            "fiction",
+            "historical fiction",
+            "school"
+        ]
+    },
+    {
+        "naslov": "A Game of Thrones",
+        "ime_avtorja": "George R.R.",
+        "priimek_avtorja": "Martin",
+        "žanri": [
+            "fantasy",
+            "fiction",
+            "epic fantasy",
+            "high fantasy"
+        ]
+    },
+    {
+        "naslov": "The Lies of Locke Lamora",
+        "ime_avtorja": "Scott",
+        "priimek_avtorja": "Lynch",
+        "žanri": [
+            "fantasy",
+            "fiction",
+            "audiobook",
+            "adventure"
+        ]
+    },
+    {
+        "naslov": "The Brothers Karamazov",
+        "ime_avtorja": "Fyodor",
+        "priimek_avtorja": "Dostoevsky",
+        "žanri": [
+            "classics",
+            "fiction",
+            "russia",
+            "russian literature"
+        ]
+    },
+    {
+        "naslov": "The Godfather",
+        "ime_avtorja": "Mario",
+        "priimek_avtorja": "Puzo",
+        "žanri": [
+            "fiction",
+            "classics",
+            "crime",
+            "thriller"
+        ]
+    },
+    {
+        "naslov": "A Thousand Splendid Suns",
+        "ime_avtorja": "Khaled",
+        "priimek_avtorja": "Hosseini",
+        "žanri": [
+            "fiction",
+            "historical fiction",
+            "book club",
+            "contemporary"
+        ]
+    },
+    {
+        "naslov": "The Princess Bride",
+        "ime_avtorja": "William",
+        "priimek_avtorja": "Goldman",
+        "žanri": [
+            "fantasy",
+            "fiction",
+            "romance",
+            "humor"
+        ]
+    },
+    {
+        "naslov": "Green Eggs and Ham",
+        "ime_avtorja": "Dr.",
+        "priimek_avtorja": "Seuss",
+        "žanri": [
+            "childrens",
+            "picture books",
+            "classics",
+            "fiction"
+        ]
+    },
+    {
+        "naslov": "Ender’s Game",
+        "ime_avtorja": "Orson Scott",
+        "priimek_avtorja": "Card",
+        "žanri": [
+            "science fiction",
+            "fiction",
+            "young adult",
+            "fantasy"
+        ]
+    },
+    {
+        "naslov": "Matilda",
+        "ime_avtorja": "Roald",
+        "priimek_avtorja": "Dahl",
+        "žanri": [
+            "fiction",
+            "childrens",
+            "classics",
+            "fantasy"
+        ]
+    },
+    {
+        "naslov": "Anne of Green Gables",
+        "ime_avtorja": "L.M.",
+        "priimek_avtorja": "Montgomery",
+        "žanri": [
+            "classics",
+            "fiction",
+            "young adult",
+            "historical fiction"
+        ]
+    },
+    {
+        "naslov": "Where the Wild Things Are",
+        "ime_avtorja": "Maurice",
+        "priimek_avtorja": "Sendak",
+        "žanri": [
+            "picture books",
+            "childrens",
+            "fiction",
+            "classics"
+        ]
+    },
+    {
+        "naslov": "Harry Potter and the Sorcerer's Stone",
+        "ime_avtorja": "J.K.",
+        "priimek_avtorja": "Rowling",
+        "žanri": [
+            "fantasy",
+            "fiction",
+            "young adult",
+            "magic"
+        ]
+    },
+    {
+        "naslov": "The Stand",
+        "ime_avtorja": "Stephen",
+        "priimek_avtorja": "King",
+        "žanri": [
+            "horror",
+            "fiction",
+            "fantasy",
+            "science fiction"
+        ]
+    },
+    {
+        "naslov": "Good Omens: The Nice and Accurate Prophecies of Agnes Nutter, Witch",
+        "ime_avtorja": "Terry",
+        "priimek_avtorja": "Pratchett",
+        "žanri": [
+            "fantasy",
+            "fiction",
+            "humor",
+            "audiobook"
+        ]
+    },
+    {
+        "naslov": "Winnie-the-Pooh",
+        "ime_avtorja": "A.A.",
+        "priimek_avtorja": "Milne",
+        "žanri": [
+            "classics",
+            "childrens",
+            "fiction",
+            "fantasy"
+        ]
+    },
+    {
+        "naslov": "I, Claudius",
+        "ime_avtorja": "Robert",
+        "priimek_avtorja": "Graves",
+        "žanri": [
+            "historical fiction",
+            "fiction",
+            "classics",
+            "historical"
+        ]
+    },
+    {
+        "naslov": "The Raven",
+        "ime_avtorja": "Edgar Allan",
+        "priimek_avtorja": "Poe",
+        "žanri": [
+            "classics",
+            "poetry",
+            "horror",
+            "fiction"
+        ]
+    },
+    {
+        "naslov": "The Master and Margarita",
+        "ime_avtorja": "Mikhail",
+        "priimek_avtorja": "Bulgakov",
+        "žanri": [
+            "fiction",
+            "fantasy",
+            "russia",
+            "russian literature"
+        ]
+    },
+    {
+        "naslov": "The Pillars of the Earth",
+        "ime_avtorja": "Ken",
+        "priimek_avtorja": "Follett",
+        "žanri": [
+            "historical fiction",
+            "fiction",
+            "historical",
+            "fantasy"
+        ]
+    },
+    {
+        "naslov": "The Very Hungry Caterpillar",
+        "ime_avtorja": "Eric",
+        "priimek_avtorja": "Carle",
+        "žanri": [
+            "picture books",
+            "childrens",
+            "fiction",
+            "animals"
+        ]
+    },
+    {
+        "naslov": "Goodnight Moon",
+        "ime_avtorja": "Margaret Wise",
+        "priimek_avtorja": "Brown",
+        "žanri": [
+            "childrens",
+            "picture books",
+            "fiction",
+            "classics"
+        ]
+    },
+    {
+        "naslov": "Watchmen",
+        "ime_avtorja": "Alan",
+        "priimek_avtorja": "Moore",
+        "žanri": [
+            "graphic novels",
+            "fiction",
+            "science fiction",
+            "fantasy"
+        ]
+    },
+    {
+        "naslov": "Pride and Prejudice",
+        "ime_avtorja": "Jane",
+        "priimek_avtorja": "Austen",
+        "žanri": [
+            "classics",
+            "romance",
+            "fiction",
+            "historical fiction"
+        ]
+    },
+    {
+        "naslov": "How the Grinch Stole Christmas!",
+        "ime_avtorja": "Dr.",
+        "priimek_avtorja": "Seuss",
+        "žanri": [
+            "childrens",
+            "picture books",
+            "christmas",
+            "classics"
+        ]
+    },
+    {
+        "naslov": "The Shadow of the Wind",
+        "ime_avtorja": "Carlos Ruiz",
+        "priimek_avtorja": "Zafón",
+        "žanri": [
+            "fiction",
+            "historical fiction",
+            "mystery",
+            "fantasy"
+        ]
+    },
+    {
+        "naslov": "V for Vendetta",
+        "ime_avtorja": "Alan",
+        "priimek_avtorja": "Moore",
+        "žanri": [
+            "graphic novels",
+            "comics",
+            "fiction",
+            "dystopia"
+        ]
+    },
+    {
+        "naslov": "East of Eden",
+        "ime_avtorja": "John",
+        "priimek_avtorja": "Steinbeck",
+        "žanri": [
+            "classics",
+            "fiction",
+            "historical fiction",
+            "literature"
+        ]
+    },
+    {
+        "naslov": "Me Before You",
+        "ime_avtorja": "Jojo",
+        "priimek_avtorja": "Moyes",
+        "žanri": [
+            "fiction",
+            "contemporary",
+            "book club",
+            "chick lit"
+        ]
+    },
+    {
+        "naslov": "The Velveteen Rabbit",
+        "ime_avtorja": "Margery Williams",
+        "priimek_avtorja": "Bianco",
+        "žanri": [
+            "classics",
+            "childrens",
+            "fiction",
+            "picture books"
+        ]
+    },
+    {
+        "naslov": "The Man Without Qualities",
+        "ime_avtorja": "Robert",
+        "priimek_avtorja": "Musil",
+        "žanri": [
+            "fiction",
+            "classics",
+            "philosophy",
+            "literature"
+        ]
+    },
+    {
+        "naslov": "The Giving Tree",
+        "ime_avtorja": "Shel",
+        "priimek_avtorja": "Silverstein",
+        "žanri": [
+            "childrens",
+            "classics",
+            "fiction",
+            "picture books"
+        ]
+    },
+    {
+        "naslov": "The Lorax",
+        "ime_avtorja": "Dr.",
+        "priimek_avtorja": "Seuss",
+        "žanri": [
+            "childrens",
+            "picture books",
+            "fiction",
+            "classics"
+        ]
+    },
+    {
+        "naslov": "A Fine Balance",
+        "ime_avtorja": "Rohinton",
+        "priimek_avtorja": "Mistry",
+        "žanri": [
+            "fiction",
+            "historical fiction",
+            "india",
+            "book club"
+        ]
+    },
+    {
+        "naslov": "The Fellowship of the Ring",
+        "ime_avtorja": "J.R.R.",
+        "priimek_avtorja": "Tolkien",
+        "žanri": [
+            "classics",
+            "fiction",
+            "adventure",
+            "high fantasy"
+        ]
+    },
+    {
+        "naslov": "Lonesome Dove",
+        "ime_avtorja": "Larry",
+        "priimek_avtorja": "McMurtry",
+        "žanri": [
+            "fiction",
+            "historical fiction",
+            "westerns",
+            "classics"
+        ]
+    },
+    {
+        "naslov": "The Name of the Wind",
+        "ime_avtorja": "Patrick",
+        "priimek_avtorja": "Rothfuss",
+        "žanri": [
+            "fantasy",
+            "fiction",
+            "epic fantasy",
+            "high fantasy"
+        ]
+    },
+    {
+        "naslov": "Night",
+        "ime_avtorja": "Elie",
+        "priimek_avtorja": "Wiesel",
+        "žanri": [
+            "nonfiction",
+            "classics",
+            "history",
+            "memoir"
+        ]
+    },
+    {
+        "naslov": "The Day of the Jackal",
+        "ime_avtorja": "Frederick",
+        "priimek_avtorja": "Forsyth",
+        "žanri": [
+            "fiction",
+            "thriller",
+            "mystery",
+            "crime"
+        ]
+    },
+    {
+        "naslov": "Tao Te Ching",
+        "ime_avtorja": "Lao",
+        "priimek_avtorja": "Tzu",
+        "žanri": [
+            "philosophy",
+            "nonfiction",
+            "classics",
+            "spirituality"
+        ]
+    },
+    {
+        "naslov": "The Hobbit, or There and Back Again",
+        "ime_avtorja": "J.R.R.",
+        "priimek_avtorja": "Tolkien",
+        "žanri": [
+            "fantasy",
+            "classics",
+            "fiction",
+            "adventure"
+        ]
+    },
+    {
+        "naslov": "Team of Rivals: The Political Genius of Abraham Lincoln",
+        "ime_avtorja": "Doris Kearns",
+        "priimek_avtorja": "Goodwin",
+        "žanri": [
+            "history",
+            "nonfiction",
+            "biography",
+            "politics"
+        ]
+    },
+    {
+        "naslov": "Madeline",
+        "ime_avtorja": "Ludwig",
+        "priimek_avtorja": "Bemelmans",
+        "žanri": [
+            "picture books",
+            "childrens",
+            "classics",
+            "fiction"
+        ]
+    },
+    {
+        "naslov": "Ready Player One",
+        "ime_avtorja": "Ernest",
+        "priimek_avtorja": "Cline",
+        "žanri": [
+            "science fiction",
+            "fiction",
+            "young adult",
+            "fantasy"
+        ]
+    },
+    {
+        "naslov": "Cutting for Stone",
+        "ime_avtorja": "Abraham",
+        "priimek_avtorja": "Verghese",
+        "žanri": [
+            "fiction",
+            "book club",
+            "historical fiction",
+            "africa"
+        ]
+    },
+    {
+        "naslov": "The Book Thief",
+        "ime_avtorja": "Markus",
+        "priimek_avtorja": "Zusak",
+        "žanri": [
+            "historical fiction",
+            "fiction",
+            "young adult",
+            "classics"
+        ]
+    },
+    {
+        "naslov": "The Lightning Thief",
+        "ime_avtorja": "Rick",
+        "priimek_avtorja": "Riordan",
+        "žanri": [
+            "fantasy",
+            "young adult",
+            "mythology",
+            "fiction"
+        ]
+    },
+    {
+        "naslov": "Man's Search for Meaning",
+        "ime_avtorja": "Viktor E.",
+        "priimek_avtorja": "Frankl",
+        "žanri": [
+            "nonfiction",
+            "psychology",
+            "philosophy",
+            "history"
+        ]
+    },
+    {
+        "naslov": "Unbroken: A World War II Story of Survival, Resilience and Redemption",
+        "ime_avtorja": "Laura",
+        "priimek_avtorja": "Hillenbrand",
+        "žanri": [
+            "nonfiction",
+            "history",
+            "biography",
+            "book club"
+        ]
+    },
+    {
+        "naslov": "And Then There Were None",
+        "ime_avtorja": "Agatha",
+        "priimek_avtorja": "Christie",
+        "žanri": [
+            "mystery",
+            "fiction",
+            "thriller",
+            "crime"
+        ]
+    },
+    {
+        "naslov": "The Autobiography of Malcolm X",
+        "ime_avtorja": "Malcolm",
+        "priimek_avtorja": "X",
+        "žanri": [
+            "nonfiction",
+            "biography",
+            "history",
+            "memoir"
+        ]
+    },
+    {
+        "naslov": "Maus I: A Survivor's Tale: My Father Bleeds History",
+        "ime_avtorja": "Art",
+        "priimek_avtorja": "Spiegelman",
+        "žanri": [
+            "graphic novels",
+            "comics",
+            "history",
+            "nonfiction"
+        ]
+    },
+    {
+        "naslov": "A Good Man Is Hard to Find and Other Stories",
+        "ime_avtorja": "Flannery",
+        "priimek_avtorja": "O&#x27;Connor",
+        "žanri": [
+            "short stories",
+            "fiction",
+            "classics",
+            "southern gothic"
+        ]
+    },
+    {
+        "naslov": "Alexander and the Terrible, Horrible, No Good, Very Bad Day",
+        "ime_avtorja": "Judith",
+        "priimek_avtorja": "Viorst",
+        "žanri": [
+            "picture books",
+            "childrens",
+            "fiction",
+            "classics"
+        ]
+    },
+    {
+        "naslov": "Duino Elegies",
+        "ime_avtorja": "Rainer Maria",
+        "priimek_avtorja": "Rilke",
+        "žanri": [
+            "poetry",
+            "classics",
+            "german literature",
+            "fiction"
+        ]
+    },
+    {
+        "naslov": "Ficciones",
+        "ime_avtorja": "Jorge Luis",
+        "priimek_avtorja": "Borges",
+        "žanri": [
+            "fiction",
+            "short stories",
+            "magical realism",
+            "fantasy"
+        ]
+    },
+    {
+        "naslov": "The Help",
+        "ime_avtorja": "Kathryn",
+        "priimek_avtorja": "Stockett",
+        "žanri": [
+            "fiction",
+            "historical fiction",
+            "book club",
+            "historical"
+        ]
+    },
+    {
+        "naslov": "The Selected Poetry of Rainer Maria Rilke",
+        "ime_avtorja": "Rainer Maria",
+        "priimek_avtorja": "Rilke",
+        "žanri": [
+            "poetry",
+            "classics",
+            "german literature",
+            "literature"
+        ]
+    },
+    {
+        "naslov": "Cosmos",
+        "ime_avtorja": "Carl",
+        "priimek_avtorja": "Sagan",
+        "žanri": [
+            "science",
+            "nonfiction",
+            "astronomy",
+            "physics"
+        ]
+    },
+    {
+        "naslov": "The Shawshank Redemption: Different Seasons",
+        "ime_avtorja": "Stephen",
+        "priimek_avtorja": "King",
+        "žanri": [
+            "fiction",
+            "audiobook",
+            "horror",
+            "thriller"
+        ]
+    },
+    {
+        "naslov": "Where the Sidewalk Ends",
+        "ime_avtorja": "Shel",
+        "priimek_avtorja": "Silverstein",
+        "žanri": [
+            "poetry",
+            "childrens",
+            "classics",
+            "fiction"
+        ]
+    },
+    {
+        "naslov": "Howl’s Moving Castle",
+        "ime_avtorja": "Diana Wynne",
+        "priimek_avtorja": "Jones",
+        "žanri": [
+            "fantasy",
+            "young adult",
+            "fiction",
+            "romance"
+        ]
+    },
+    {
+        "naslov": "Roots: The Saga of an American Family",
+        "ime_avtorja": "Alex",
+        "priimek_avtorja": "Haley",
+        "žanri": [
+            "historical fiction",
+            "fiction",
+            "classics",
+            "historical"
+        ]
+    },
+    {
+        "naslov": "The Complete Grimm's Fairy Tales",
+        "ime_avtorja": "Jacob",
+        "priimek_avtorja": "Grimm",
+        "žanri": [
+            "classics",
+            "fantasy",
+            "fiction",
+            "short stories"
+        ]
+    },
+    {
+        "naslov": "Shakespeare's Sonnets",
+        "ime_avtorja": "William",
+        "priimek_avtorja": "Shakespeare",
+        "žanri": [
+            "poetry",
+            "classics",
+            "shakespeare",
+            "fiction"
+        ]
+    },
+    {
+        "naslov": "The Winds of War",
+        "ime_avtorja": "Herman",
+        "priimek_avtorja": "Wouk",
+        "žanri": [
+            "historical fiction",
+            "fiction",
+            "world war ii",
+            "war"
+        ]
+    },
+    {
+        "naslov": "Short Stories",
+        "ime_avtorja": "Anton",
+        "priimek_avtorja": "Chekhov",
+        "žanri": [
+            "short stories",
+            "fiction",
+            "classics",
+            "russia"
+        ]
+    },
+    {
+        "naslov": "The Hunger Games",
+        "ime_avtorja": "Suzanne",
+        "priimek_avtorja": "Collins",
+        "žanri": [
+            "young adult",
+            "dystopia",
+            "fiction",
+            "fantasy"
+        ]
+    },
+    {
+        "naslov": "The Book of Disquiet",
+        "ime_avtorja": "Fernando",
+        "priimek_avtorja": "Pessoa",
+        "žanri": [
+            "fiction",
+            "classics",
+            "poetry",
+            "philosophy"
+        ]
+    },
+    {
+        "naslov": "The Shock Doctrine: The Rise of Disaster Capitalism",
+        "ime_avtorja": "Naomi",
+        "priimek_avtorja": "Klein",
+        "žanri": [
+            "nonfiction",
+            "politics",
+            "economics",
+            "history"
+        ]
+    },
+    {
+        "naslov": "Someone Knows My Name",
+        "ime_avtorja": "Lawrence",
+        "priimek_avtorja": "Hill",
+        "žanri": [
+            "historical fiction",
+            "fiction",
+            "book club",
+            "canada"
+        ]
+    },
+    {
+        "naslov": "The Martian",
+        "ime_avtorja": "Andy",
+        "priimek_avtorja": "Weir",
+        "žanri": [
+            "science fiction",
+            "fiction",
+            "audiobook",
+            "book club"
+        ]
+    },
+    {
+        "naslov": "Between Shades of Gray",
+        "ime_avtorja": "Ruta",
+        "priimek_avtorja": "Sepetys",
+        "žanri": [
+            "historical fiction",
+            "young adult",
+            "fiction",
+            "historical"
+        ]
+    },
+    {
+        "naslov": "The Complete Fairy Tales",
+        "ime_avtorja": "Hans Christian",
+        "priimek_avtorja": "Andersen",
+        "žanri": [
+            "classics",
+            "fantasy",
+            "fiction",
+            "childrens"
+        ]
+    },
+    {
+        "naslov": "The Importance of Being Earnest and Other Plays",
+        "ime_avtorja": "Oscar",
+        "priimek_avtorja": "Wilde",
+        "žanri": [
+            "classics",
+            "plays",
+            "fiction",
+            "drama"
+        ]
+    },
+    {
+        "naslov": "Les Fleurs du Mal",
+        "ime_avtorja": "Charles",
+        "priimek_avtorja": "Baudelaire",
+        "žanri": [
+            "poetry",
+            "classics",
+            "france",
+            "french literature"
+        ]
+    },
+    {
+        "naslov": "Alanna: The First Adventure",
+        "ime_avtorja": "Tamora",
+        "priimek_avtorja": "Pierce",
+        "žanri": [
+            "fantasy",
+            "young adult",
+            "fiction",
+            "magic"
+        ]
+    },
+    {
+        "naslov": "The Last Lecture",
+        "ime_avtorja": "Randy",
+        "priimek_avtorja": "Pausch",
+        "žanri": [
+            "nonfiction",
+            "memoir",
+            "biography",
+            "self help"
+        ]
+    },
+    {
+        "naslov": "The Little Prince",
+        "ime_avtorja": "Antoine de",
+        "priimek_avtorja": "Saint-Exupéry",
+        "žanri": [
+            "classics",
+            "fiction",
+            "fantasy",
+            "childrens"
+        ]
+    },
+    {
+        "naslov": "A Child's Garden of Verses",
+        "ime_avtorja": "Robert Louis",
+        "priimek_avtorja": "Stevenson",
+        "žanri": [
+            "poetry",
+            "childrens",
+            "classics",
+            "picture books"
+        ]
+    },
+    {
+        "naslov": "In Search of Lost Time",
+        "ime_avtorja": "Marcel",
+        "priimek_avtorja": "Proust",
+        "žanri": [
+            "fiction",
+            "france",
+            "literature",
+            "philosophy"
+        ]
+    },
+    {
+        "naslov": "Memoirs of Hadrian",
+        "ime_avtorja": "Marguerite",
+        "priimek_avtorja": "Yourcenar",
+        "žanri": [
+            "historical fiction",
+            "fiction",
+            "classics",
+            "france"
+        ]
+    },
+    {
+        "naslov": "Corduroy",
+        "ime_avtorja": "Don",
+        "priimek_avtorja": "Freeman",
+        "žanri": [
+            "picture books",
+            "childrens",
+            "fiction",
+            "classics"
+        ]
+    },
+    {
+        "naslov": "The Brothers K",
+        "ime_avtorja": "David James",
+        "priimek_avtorja": "Duncan",
+        "žanri": [
+            "fiction",
+            "historical fiction",
+            "baseball",
+            "sports"
+        ]
+    },
+    {
+        "naslov": "Journey to the End of the Night",
+        "ime_avtorja": "Louis-Ferdinand",
+        "priimek_avtorja": "Céline",
+        "žanri": [
+            "fiction",
+            "classics",
+            "france",
+            "literature"
+        ]
+    },
+    {
+        "naslov": "Schindler's Ark",
+        "ime_avtorja": "Thomas",
+        "priimek_avtorja": "Keneally",
+        "žanri": [
+            "history",
+            "nonfiction",
+            "classics",
+            "holocaust"
+        ]
+    },
+    {
+        "naslov": "Angle of Repose",
+        "ime_avtorja": "Wallace",
+        "priimek_avtorja": "Stegner",
+        "žanri": [
+            "fiction",
+            "historical fiction",
+            "classics",
+            "book club"
+        ]
+    },
+    {
+        "naslov": "A Prayer for Owen Meany",
+        "ime_avtorja": "John",
+        "priimek_avtorja": "Irving",
+        "žanri": [
+            "fiction",
+            "classics",
+            "book club",
+            "contemporary"
+        ]
+    },
+    {
+        "naslov": "The Authoritative Calvin and Hobbes: A Calvin and Hobbes Treasury",
+        "ime_avtorja": "Bill",
+        "priimek_avtorja": "Watterson",
+        "žanri": [
+            "comics",
+            "humor",
+            "graphic novels",
+            "fiction"
+        ]
+    },
+    {
+        "naslov": "Gone with the Wind",
+        "ime_avtorja": "Margaret",
+        "priimek_avtorja": "Mitchell",
+        "žanri": [
+            "classics",
+            "historical fiction",
+            "fiction",
+            "romance"
+        ]
+    },
+    {
+        "naslov": "The Love Song of J. Alfred Prufrock and Other Poems",
+        "ime_avtorja": "T.S.",
+        "priimek_avtorja": "Eliot",
+        "žanri": [
+            "poetry",
+            "classics",
+            "fiction",
+            "literature"
+        ]
+    },
+    {
+        "naslov": "Labyrinths: Selected Stories & Other Writings",
+        "ime_avtorja": "Jorge Luis",
+        "priimek_avtorja": "Borges",
+        "žanri": [
+            "fiction",
+            "short stories",
+            "classics",
+            "magical realism"
+        ]
+    },
+    {
+        "naslov": "Love You Forever",
+        "ime_avtorja": "Robert",
+        "priimek_avtorja": "Munsch",
+        "žanri": [
+            "picture books",
+            "childrens",
+            "fiction",
+            "classics"
+        ]
+    },
+    {
+        "naslov": "Surely You're Joking, Mr. Feynman!: Adventures of a Curious Character",
+        "ime_avtorja": "Richard P.",
+        "priimek_avtorja": "Feynman",
+        "žanri": [
+            "science",
+            "nonfiction",
+            "biography",
+            "physics"
+        ]
+    },
+    {
+        "naslov": "Rebecca",
+        "ime_avtorja": "Daphne du",
+        "priimek_avtorja": "Maurier",
+        "žanri": [
+            "classics",
+            "fiction",
+            "mystery",
+            "gothic"
+        ]
+    },
+    {
+        "naslov": "The Nightingale",
+        "ime_avtorja": "Kristin",
+        "priimek_avtorja": "Hannah",
+        "žanri": [
+            "historical fiction",
+            "fiction",
+            "book club",
+            "historical"
+        ]
+    },
+    {
+        "naslov": "Mistborn: The Final Empire",
+        "ime_avtorja": "Brandon",
+        "priimek_avtorja": "Sanderson",
+        "žanri": [
+            "fantasy",
+            "fiction",
+            "high fantasy",
+            "audiobook"
+        ]
+    },
+    {
+        "naslov": "A Man Called Ove",
+        "ime_avtorja": "Fredrik",
+        "priimek_avtorja": "Backman",
+        "žanri": [
+            "fiction",
+            "book club",
+            "contemporary",
+            "audiobook"
+        ]
+    },
+    {
+        "naslov": "Harold and the Purple Crayon",
+        "ime_avtorja": "Crockett",
+        "priimek_avtorja": "Johnson",
+        "žanri": [
+            "picture books",
+            "childrens",
+            "fiction",
+            "classics"
+        ]
+    },
+    {
+        "naslov": "Wool Omnibus",
+        "ime_avtorja": "Hugh",
+        "priimek_avtorja": "Howey",
+        "žanri": [
+            "science fiction",
+            "fiction",
+            "dystopia",
+            "post apocalyptic"
+        ]
+    }
+]
