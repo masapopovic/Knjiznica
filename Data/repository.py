@@ -1,24 +1,14 @@
 import psycopg2, psycopg2.extensions, psycopg2.extras, json
 psycopg2.extensions.register_type(psycopg2.extensions.UNICODE) # se znebimo problemov s šumniki
-import os
-import auth_public as auth
 import datetime
+import os
+
+
+import auth_public as auth_javnost  # uporabnik javnost
+import auth as auth  # uporabnik jaz
 
 from models import Clan, ClanDto, Knjiga, Avtor, BralnoSrecanje, Ocena, Izposoja, Rezervacija, KnjigaInAvtor, Udelezba
 from typing import List
-
-# Preberemo port za bazo iz okoljskih spremenljivk
-DB_PORT = os.environ.get('POSTGRES_PORT', 5432)
-
-## V tej datoteki bomo implementirali razred Repo, ki bo vseboval metode za delo z bazo.
-
-
-import psycopg2
-import psycopg2.extras
-import os
-import json
-import Data.auth_public as auth_javnost  # uporabnik javnost
-import Data.auth as auth  # uporabnik jaz
 
 DB_PORT = os.environ.get('POSTGRES_PORT', 5432)
 
@@ -69,7 +59,7 @@ class Repo:
             # Vstavimo knjigo
             self.cur.execute(
                 "INSERT INTO knjiga (naslov, zanr, razpolozljivost) VALUES (%s, %s, %s) RETURNING id_knjige",
-                (knjiga['naslov'], knjiga['zanr'], 'na voljo')
+                (knjiga['naslov'], knjiga['žanri'], 'na voljo')
             )
             id_knjige = self.cur.fetchone()['id_knjige']
 
@@ -85,7 +75,10 @@ class Repo:
 
 
 
-if __name__ == "__main__":
-    repo = Repo()
-    repo.uvozi_knjige_iz_json("Data/knjige.json")  # Ker je JSON v isti mapi kot repository
-    print("Uvoz knjig je končan!")
+# Za uvoz podatkov (admin)
+admin_repo = Repo(admin=True)
+admin_repo.uvozi_knjige_iz_json("Data/knjige.json")
+
+# Za normalno uporabo aplikacije (javnost)
+repo = Repo(admin=False)
+# tu potem kliceš funkcije za branje/izposojo knjig itd.
