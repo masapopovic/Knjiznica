@@ -1,10 +1,10 @@
 import psycopg2, psycopg2.extensions, psycopg2.extras, json
 psycopg2.extensions.register_type(psycopg2.extensions.UNICODE) # se znebimo problemov s šumniki
 import os
-import Data.auth_public as auth
+import auth_public as auth
 import datetime
 
-from Data.models import Clan, ClanDto, Knjiga, Avtor, BralnoSrecanje, Ocena, Izposoja, Rezervacija, KnjigaInAvtor, Udelezba
+from models import Clan, ClanDto, Knjiga, Avtor, BralnoSrecanje, Ocena, Izposoja, Rezervacija, KnjigaInAvtor, Udelezba
 from typing import List
 
 # Preberemo port za bazo iz okoljskih spremenljivk
@@ -13,15 +13,36 @@ DB_PORT = os.environ.get('POSTGRES_PORT', 5432)
 ## V tej datoteki bomo implementirali razred Repo, ki bo vseboval metode za delo z bazo.
 
 
+import psycopg2
+import psycopg2.extras
+import os
+import json
+import Data.auth_public as auth_javnost  # uporabnik javnost
+import Data.auth as auth  # uporabnik jaz
+
+DB_PORT = os.environ.get('POSTGRES_PORT', 5432)
+
 class Repo:
-    def __init__(self):
-        self.conn = psycopg2.connect(
-            database=auth.db,
-            host=auth.host,
-            user=auth.user,
-            password=auth.password,
-            port=DB_PORT
-        )
+    def __init__(self, admin=False):
+        """
+        Če je admin=True, uporabi admin uporabnika, sicer javnost.
+        """
+        if admin:
+            self.conn = psycopg2.connect(
+                database=auth.db,
+                host=auth.host,
+                user=auth.user,
+                password=auth.password,
+                port=DB_PORT
+            )
+        else:
+            self.conn = psycopg2.connect(
+                database=auth_javnost.db,
+                host=auth_javnost.host,
+                user=auth_javnost.user,
+                password=auth_javnost.password,
+                port=DB_PORT
+            )
         self.cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     def uvozi_knjige_iz_json(self, pot_do_json: str):
@@ -59,4 +80,12 @@ class Repo:
             )
 
         self.conn.commit()
-        print("Uvoz knjig zaključen")
+
+
+
+
+
+if __name__ == "__main__":
+    repo = Repo()
+    repo.uvozi_knjige_iz_json("Data/knjige.json")  # Ker je JSON v isti mapi kot repository
+    print("Uvoz knjig je končan!")
