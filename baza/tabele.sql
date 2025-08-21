@@ -8,6 +8,7 @@ CREATE TABLE clan (
     status_clana TEXT NOT NULL CHECK (status_clana IN ('aktiven', 'neaktiven'))
 );
 
+
 CREATE TABLE knjiga (
     id_knjige SERIAL PRIMARY KEY,
     naslov TEXT NOT NULL,
