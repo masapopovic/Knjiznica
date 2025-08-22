@@ -245,7 +245,8 @@ class Repo:
             datum_izposoje=izposoja_row['datum_izposoje'],
             rok_vracila=izposoja_row['rok_vracila']
         )
-    # Rezervscija
+    
+    # Rezervacija
     def rezerviraj_knjigo(self, id_clana: int, id_knjige: int) -> Rezervacija:
         # Preveri ali knjiga obstaja
         self.cur.execute("""
@@ -429,6 +430,48 @@ class Repo:
             for row in rows
         ]
 
+    def isci_srecanja(self, naziv: Optional[str] = None, datum: Optional[datetime.date] = None) -> List[BralnoSrecanje]:
+        """
+        Iskanje prihodnjih bralnih srečanj po nazivu in/ali datumu.
+        Če parametra ni, se ignorira pri iskanju.
+        Vrača samo srečanja od danes naprej.
+        """
+        query = """
+            SELECT 
+                id_srecanja,
+                prostor,
+                datum,
+                naziv_in_opis,
+                id_knjige
+            FROM bralno_srecanje
+            WHERE datum >= CURRENT_DATE
+        """
+        params = []
+
+        if naziv:
+            query += " AND LOWER(naziv_in_opis) LIKE LOWER(%s)"
+            params.append(f"%{naziv}%")
+        if datum:
+            query += " AND DATE(datum) = %s"
+            params.append(datum)
+
+        query += " ORDER BY datum ASC"
+
+        self.cur.execute(query, params)
+        rows = self.cur.fetchall()
+
+        rezultat = []
+        for row in rows:
+            bs = BralnoSrecanje(
+                id_srecanja=row['id_srecanja'],
+                prostor=row['prostor'],
+                datum=row['datum'],
+                naziv_in_opis=row['naziv_in_opis'],
+                id_knjige=row['id_knjige']
+            )
+            rezultat.append(bs)
+
+        return rezultat
 
 
 
