@@ -107,6 +107,7 @@ class Repo:
                              ))
         self.conn.commit()
         
+        
     def povprecna_ocena_knjige(self, id_knjige: int) -> Optional[float]:
         self.cur.execute("""
                          SELECT ROUND(AVG(ocena)::numeric, 2) AS povprecje
@@ -115,6 +116,7 @@ class Repo:
                          """, (id_knjige,))
         row = self.cur.fetchone()
         return row['povprecje'] if row and row['povprecje'] is not None else 0
+    
     
     def dobi_ocene_po_naslovu_in_avtorju(self, naslov_knjige: Optional[str] = None, avtor: Optional[str] = None) -> List[dict]:
         query = """
@@ -142,6 +144,23 @@ class Repo:
                 query += " ORDER BY o.id_ocene ASC"
                 self.cur.execute(query, params)
                 return [dict(row) for row in self.cur.fetchall()]
+            
+
+    def knjige_z_oceno_vecjo_od(self, min_ocena: int) -> List[dict]:
+        self.cur.execute("""
+            SELECT 
+                k.id_knjige,
+                k.naslov,
+                k.avtor,
+                ROUND(AVG(o.ocena)::numeric, 2) AS povprecna_ocena,
+                COUNT(o.id_ocene) AS stevilo_ocen
+            FROM knjiga k
+            JOIN ocena o ON k.id_knjige = o.id_knjige
+            GROUP BY k.id_knjige, k.naslov, k.avtor
+            HAVING AVG(o.ocena) > %s
+            ORDER BY povprecna_ocena DESC
+        """, (min_ocena,))
+        return [dict(row) for row in self.cur.fetchall()]
 
 
 
