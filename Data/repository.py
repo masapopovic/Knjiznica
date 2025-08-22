@@ -117,8 +117,16 @@ class Repo:
         return float(row['povprecje']) if row and row['povprecje'] is not None else None
 
     
-    
-    def dobi_ocene_po_naslovu_in_avtorju(self, naslov_knjige: Optional[str] = None, avtor: Optional[str] = None) -> List[Ocena]:
+    def dobi_ocene_po_naslovu_in_avtorju(
+        self, 
+        naslov_knjige: Optional[str] = None, 
+        ime_avtorja: Optional[str] = None, 
+        priimek_avtorja: Optional[str] = None
+    ) -> List[Ocena]:
+        """
+        Vrne seznam ocen glede na naslov knjige in/ali ime in priimek avtorja.
+        Če je katerikoli argument None, se ignorira pri iskanju.
+        """
         query = """
         SELECT 
             o.id_ocene,
@@ -134,18 +142,21 @@ class Repo:
         WHERE 1=1
         """
         params = []
+        
         if naslov_knjige:
             query += " AND LOWER(k.naslov) = LOWER(%s)"
             params.append(naslov_knjige)
-        if avtor:
-            query += " AND LOWER(a.ime || ' ' || a.priimek) = LOWER(%s)"
-            params.append(avtor)
+        if ime_avtorja:
+            query += " AND LOWER(a.ime) LIKE LOWER(%s)"
+            params.append(f"%{ime_avtorja}%")
+        if priimek_avtorja:
+            query += " AND LOWER(a.priimek) LIKE LOWER(%s)"
+            params.append(f"%{priimek_avtorja}%")
         
         query += " ORDER BY o.id_ocene ASC"
         
         self.cur.execute(query, params)
         return [Ocena.from_dict(dict(row)) for row in self.cur.fetchall()]
-
 
             
 
@@ -174,43 +185,7 @@ class Repo:
         rows = self.cur.fetchall()
         return [Knjiga.from_dict(dict(row)) for row in rows]
     
-    # Izposoja knjige 
-    def izposoji_knjigo(self, id_clana: int, id_knjige: int) -> Optional[Izposoja]:
-        # Preveri ali je knjiga na voljo
-        self.cur.execute("""
-            SELECT razpolozljivost FROM knjiga WHERE id_knjige = %s
-        """, (id_knjige,))
-        row = self.cur.fetchone()
-        if not row:
-            raise ValueError("Knjiga s tem ID ne obstaja.")
-        if row['razpolozljivost'] != 'na voljo':
-            raise ValueError("Knjiga trenutno ni na voljo za izposojo.")
-
-        # Vstavi izposojo
-        self.cur.execute("""
-            INSERT INTO izposoja (id_clana, id_knjige)
-            VALUES (%s, %s)
-            RETURNING id_clana, id_knjige, datum_izposoje, rok_vracila
-        """, (id_clana, id_knjige))
-        izposoja_row = self.cur.fetchone()
-
-        # Posodobi razpoložljivost knjige
-        self.cur.execute("""
-            UPDATE knjiga
-            SET razpolozljivost = 'ni na voljo'
-            WHERE id_knjige = %s
-        """, (id_knjige,))
-
-        self.conn.commit()
-
-        # Vrni objekt razreda Izposoja
-        return Izposoja(
-            id_clana=izposoja_row['id_clana'],
-            id_knjige=izposoja_row['id_knjige'],
-            datum_izposoje=izposoja_row['datum_izposoje'],
-            rok_vracila=izposoja_row['rok_vracila']
-        )
-
+    #
 
 
 
