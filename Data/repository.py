@@ -109,15 +109,16 @@ class Repo:
         
     def povprecna_ocena_knjige(self, id_knjige: int) -> Optional[float]:
         self.cur.execute("""
-                         SELECT ROUND(AVG(ocena)::numeric, 2) AS povprecje
-                         FROM ocena
-                         WHERE id_knjige = %s
-                         """, (id_knjige,))
+            SELECT ROUND(AVG(ocena)::numeric, 2) AS povprecje
+            FROM ocena
+            WHERE id_knjige = %s
+        """, (id_knjige,))
         row = self.cur.fetchone()
-        return row['povprecje'] if row and row['povprecje'] is not None else 0
+        return float(row['povprecje']) if row and row['povprecje'] is not None else None
+
     
     
-    def dobi_ocene_po_naslovu_in_avtorju(self, naslov_knjige: Optional[str] = None, avtor: Optional[str] = None) -> List[dict]:
+    def dobi_ocene_po_naslovu_in_avtorju(self, naslov_knjige: Optional[str] = None, avtor: Optional[str] = None) -> List[Ocena]:
         query = """
         SELECT 
             o.id_ocene,
@@ -125,44 +126,45 @@ class Repo:
             o.datum,
             o.komentar,
             o.id_clana,
-            c.ime || ' ' || c.priimek AS clan,
-            k.naslov AS knjiga,
-            k.avtor AS avtor_knjige
+            o.id_knjige
         FROM ocena o
-        JOIN clan c ON o.id_clana = c.id_clana
         JOIN knjiga k ON o.id_knjige = k.id_knjige
+        JOIN knjiga_in_avtor ka ON k.id_knjige = ka.id_knjige
+        JOIN avtor a ON ka.id_avtorja = a.id_avtorja
         WHERE 1=1
         """
         params = []
         if naslov_knjige:
             query += " AND LOWER(k.naslov) = LOWER(%s)"
             params.append(naslov_knjige)
-            if avtor:
-                query += " AND LOWER(k.avtor) = LOWER(%s)"
-                params.append(avtor)
-                query += " ORDER BY o.id_ocene ASC"
-                self.cur.execute(query, params)
-                return [dict(row) for row in self.cur.fetchall()]
+        if avtor:
+            query += " AND LOWER(a.ime || ' ' || a.priimek) = LOWER(%s)"
+            params.append(avtor)
+        
+        query += " ORDER BY o.id_ocene ASC"
+        
+        self.cur.execute(query, params)
+        return [Ocena.from_dict(dict(row)) for row in self.cur.fetchall()]
+
+
             
 
-    def knjige_z_oceno_vecjo_od(self, min_ocena: int) -> List[dict]:
+    def knjige_z_oceno_vecjo_od(self, min_ocena: int) -> List[Knjiga]:
         self.cur.execute("""
             SELECT 
                 k.id_knjige,
                 k.naslov,
-                k.avtor,
-                ROUND(AVG(o.ocena)::numeric, 2) AS povprecna_ocena,
-                COUNT(o.id_ocene) AS stevilo_ocen
+                k.zanr,
+                k.razpolozljivost
             FROM knjiga k
             JOIN ocena o ON k.id_knjige = o.id_knjige
-            GROUP BY k.id_knjige, k.naslov, k.avtor
+            GROUP BY k.id_knjige, k.naslov, k.zanr, k.razpolozljivost
             HAVING AVG(o.ocena) > %s
-            ORDER BY povprecna_ocena DESC
+            ORDER BY AVG(o.ocena) DESC
         """, (min_ocena,))
-        return [dict(row) for row in self.cur.fetchall()]
-    
-    from Data.models import Knjiga
+        return [Knjiga.from_dict(dict(row)) for row in self.cur.fetchall()]
 
+    #knjige po žanrih
     def poisci_knjige_po_vec_zanrih(self, zanri: list[str]) -> list[Knjiga]:    #lahko iščeš po več žanrih
         self.cur.execute("""
             SELECT id_knjige, naslov, zanr, razpolozljivost
@@ -171,6 +173,8 @@ class Repo:
         """, (zanri,))
         rows = self.cur.fetchall()
         return [Knjiga.from_dict(dict(row)) for row in rows]
+    
+    #
 
 
 
