@@ -3,7 +3,7 @@ psycopg2.extensions.register_type(psycopg2.extensions.UNICODE) # se znebimo prob
 import datetime
 import os
 from typing import List, Optional
-from security import verify_password
+
 
 import auth_public as auth_javnost  # uporabnik javnost
 import auth as auth  # uporabnik jaz
@@ -11,6 +11,12 @@ import auth as auth  # uporabnik jaz
 from models import Clan, ClanDto, Knjiga, Avtor, BralnoSrecanje, Ocena, Izposoja, Rezervacija, KnjigaInAvtor, Udelezba
 
 DB_PORT = os.environ.get('POSTGRES_PORT', 5432)
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """
+    Preveri vneseno geslo proti hash-u iz baze.
+    """
+    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
 class Repo:
     def __init__(self, admin=False):
@@ -70,13 +76,6 @@ class Repo:
             )
 
         self.conn.commit()
-
-    
-    def verify_password(plain_password: str, hashed_password: str) -> bool:
-        """
-        Preveri vneseno geslo proti hash-u iz baze.
-        """
-        return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
     
     
     def dobi_clana_po_uporabniskem_imenu(self, uporabnisko_ime: str) -> Optional[Clan]:
@@ -94,7 +93,6 @@ class Repo:
         if clan and verify_password(geslo, clan.geslo):
             return clan
         return None
-
 
 
     def dodaj_clana(self, clan: Clan):
