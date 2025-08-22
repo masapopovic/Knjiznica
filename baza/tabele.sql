@@ -55,14 +55,13 @@ CREATE TABLE izposoja (
     FOREIGN KEY (id_knjige) REFERENCES knjiga(id_knjige)
 )
 
-CREATE TABLE rezervacija (
-    id_clana INT NOT NULL,
-    id_knjige INT NOT NULL,
-    datum_rezervacije DATE DEFAULT CURRENT_DATE,
-    PRIMARY KEY (id_clana, id_knjige, datum_rezervacije),
-    FOREIGN KEY (id_clana) REFERENCES clan(id_clana),
-    FOREIGN KEY (id_knjige) REFERENCES knjiga(id_knjige)
-)
+CREATE TABLE vracila (
+    id_vracila SERIAL PRIMARY KEY,
+    id_clana INT NOT NULL REFERENCES clan(id_clana),
+    id_knjige INT NOT NULL REFERENCES knjiga(id_knjige),
+    datum_vracila DATE NOT NULL DEFAULT CURRENT_DATE
+);
+
 
 
 CREATE TABLE knjiga_in_avtor (

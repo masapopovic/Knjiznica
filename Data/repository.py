@@ -236,7 +236,7 @@ class Repo:
 
     
     #Izposoja 
-    def izposodi_knjigo(self, id_clana: int, id_knjige: int) -> Optional[Izposoja]:
+    def izposodi_knjigo(self, id_clana: int, id_knjige: int) -> None:
         # Preveri ali je knjiga na voljo
         self.cur.execute("""
             SELECT razpolozljivost FROM knjiga WHERE id_knjige = %s
@@ -251,9 +251,7 @@ class Repo:
         self.cur.execute("""
             INSERT INTO izposoja (id_clana, id_knjige)
             VALUES (%s, %s)
-            RETURNING id_clana, id_knjige, datum_izposoje, rok_vracila
         """, (id_clana, id_knjige))
-        izposoja_row = self.cur.fetchone()
 
         # Posodobi razpoložljivost knjige
         self.cur.execute("""
@@ -264,175 +262,67 @@ class Repo:
 
         self.conn.commit()
 
-        # Vrni objekt razreda Izposoja
-        return Izposoja(
-            id_clana=izposoja_row['id_clana'],
-            id_knjige=izposoja_row['id_knjige'],
-            datum_izposoje=izposoja_row['datum_izposoje'],
-            rok_vracila=izposoja_row['rok_vracila']
-        )
     
-    # Rezervacija
-    def rezerviraj_knjigo(self, id_clana: int, id_knjige: int) -> Rezervacija:
-        # Preveri ali knjiga obstaja
+    # vračilo 
+    def vrni_knjigo(self, id_clana: int, id_knjige: int):
+        # Zabeleži vračilo v tabeli vracila
         self.cur.execute("""
-            SELECT razpolozljivost FROM knjiga WHERE id_knjige = %s
-        """, (id_knjige,))
-        row = self.cur.fetchone()
-        if not row:
-            raise ValueError("Knjiga s tem ID ne obstaja.")
+            INSERT INTO vracila (id_clana, id_knjige)
+            VALUES (%s, %s)
+        """, (id_clana, id_knjige))
 
-        danes = datetime.date.today()
-
-        # Pridobi vse prihodnje izposoje
+        # Posodobi razpoložljivost knjige
         self.cur.execute("""
-            SELECT rok_vracila FROM izposoja
+            UPDATE knjiga
+            SET razpolozljivost = 'na voljo'
             WHERE id_knjige = %s
-            ORDER BY rok_vracila ASC
         """, (id_knjige,))
-        izposoje = [r['rok_vracila'] for r in self.cur.fetchall()]
-
-        # Pridobi vse obstoječe rezervacije, urejene po datumu
-        self.cur.execute("""
-            SELECT datum_rezervacije FROM rezervacija
-            WHERE id_knjige = %s
-            ORDER BY datum_rezervacije ASC
-        """, (id_knjige,))
-        rezervacije = [r['datum_rezervacije'] for r in self.cur.fetchall()]
-
-        # Določi prvi prosti datum
-        if row['razpolozljivost'] == 'na voljo' and not izposoje and not rezervacije:
-            # knjiga je prosta, ni izposoj, ni rezervacij
-            naslednji_prosti_datum = danes
-        else:
-            # kombiniramo izposoje in rezervacije v vrstni red
-            vsi_datumi = sorted(izposoje + rezervacije)
-            # zadnji datum + 21 dni
-            if vsi_datumi:
-                zadnji = vsi_datumi[-1]
-                naslednji_prosti_datum = zadnji + datetime.timedelta(days=21)
-            else:
-                naslednji_prosti_datum = danes
-
-        # Vstavi rezervacijo s trenutnim datumom
-        self.cur.execute("""
-            INSERT INTO rezervacija (id_clana, id_knjige, datum_rezervacije)
-            VALUES (%s, %s, %s)
-            RETURNING id_clana, id_knjige, datum_rezervacije
-        """, (id_clana, id_knjige, danes))
-        rezervacija_row = self.cur.fetchone()
 
         self.conn.commit()
 
-        # Vrni objekt razreda Rezervacija
-        return Rezervacija(
-            id_clana=rezervacija_row['id_clana'],
-            id_knjige=rezervacija_row['id_knjige'],
-            datum_rezervacije=rezervacija_row['datum_rezervacije'],
-            naslednji_prosti_datum=naslednji_prosti_datum  # dodaten atribut v razredu
-        )
-    
-    def cakalna_vrsta_knjige(self, id_knjige: int) -> List[Rezervacija]:
-        # Preveri, ali knjiga obstaja
-        self.cur.execute("""
-            SELECT naslov FROM knjiga WHERE id_knjige = %s
-        """, (id_knjige,))
-        row = self.cur.fetchone()
-        if not row:
-            raise ValueError("Knjiga s tem ID ne obstaja.")
 
-        danes = datetime.date.today()
-
-        # Pridobi vse prihodnje izposoje
-        self.cur.execute("""
-            SELECT rok_vracila FROM izposoja
-            WHERE id_knjige = %s
-            ORDER BY rok_vracila ASC
-        """, (id_knjige,))
-        izposoje = [r['rok_vracila'] for r in self.cur.fetchall()]
-
-        # Pridobi vse rezervacije, urejene po datumu
-        self.cur.execute("""
-            SELECT id_clana, datum_rezervacije FROM rezervacija
-            WHERE id_knjige = %s
-            ORDER BY datum_rezervacije ASC
-        """, (id_knjige,))
-        rezervacije_rows = self.cur.fetchall()
-
-        # Izračunamo naslednji prosti datum za vsako rezervacijo
-        vsi_datumi = sorted(izposoje)
-        cakalna_lista = []
-
-        for rez in rezervacije_rows:
-            if not vsi_datumi:
-                naslednji_prosti = danes
-            else:
-                zadnji = vsi_datumi[-1]
-                naslednji_prosti = zadnji + datetime.timedelta(days=21)
-            vsi_datumi.append(naslednji_prosti)
-            cakalna_lista.append(
-                Rezervacija(
-                    id_clana=rez['id_clana'],
-                    id_knjige=id_knjige,
-                    datum_rezervacije=rez['datum_rezervacije'],
-                    naslednji_prosti_datum=naslednji_prosti
-                )
-            )
-
-        return cakalna_lista
-    
-    
-    def cakalna_vrsta_s_pozicijo(self, id_knjige: int) -> List[Rezervacija]:
-        # Preveri, ali knjiga obstaja
-        self.cur.execute("""
-            SELECT naslov FROM knjiga WHERE id_knjige = %s
-        """, (id_knjige,))
-        row = self.cur.fetchone()
-        if not row:
-            raise ValueError("Knjiga s tem ID ne obstaja.")
-
-        danes = datetime.date.today()
-
-        # Pridobi vse prihodnje izposoje
-        self.cur.execute("""
-            SELECT rok_vracila FROM izposoja
-            WHERE id_knjige = %s
-            ORDER BY rok_vracila ASC
-        """, (id_knjige,))
-        izposoje = [r['rok_vracila'] for r in self.cur.fetchall()]
-
-        # Pridobi vse rezervacije, urejene po datumu
-        self.cur.execute("""
-            SELECT id_clana, datum_rezervacije FROM rezervacija
-            WHERE id_knjige = %s
-            ORDER BY datum_rezervacije ASC
-        """, (id_knjige,))
-        rezervacije_rows = self.cur.fetchall()
-
-        vsi_datumi = sorted(izposoje)
-        cakalna_lista = []
-
-        for idx, rez in enumerate(rezervacije_rows, start=1):
-            if not vsi_datumi:
-                naslednji_prosti = danes
-            else:
-                zadnji = vsi_datumi[-1]
-                naslednji_prosti = zadnji + datetime.timedelta(days=21)
-            vsi_datumi.append(naslednji_prosti)
-            cakalna_lista.append(
-                Rezervacija(
-                    id_clana=rez['id_clana'],
-                    id_knjige=id_knjige,
-                    datum_rezervacije=rez['datum_rezervacije'],
-                    naslednji_prosti_datum=naslednji_prosti,
-                    pozicija_v_vrsti=idx  # nova informacija o poziciji
-                )
-            )
-
-        return cakalna_lista
-    
     #Bralno srecanje
+    def prijava_na_srecanje(self, id_clana: int, datum: str, naziv: str) -> None:
+        """
+        Prijavi člana na bralno srečanje glede na datum in naziv srečanja.
+        Če srečanje ne obstaja ali je član že prijavljen, sproži napako.
+        """
+        # Poišči srečanje po datumu in nazivu
+        self.cur.execute("""
+            SELECT id_srecanja
+            FROM bralno_srecanje
+            WHERE datum = %s AND LOWER(naziv_in_opis) = LOWER(%s)
+        """, (datum, naziv))
+        
+        srecanje = self.cur.fetchone()
+        if not srecanje:
+            raise ValueError("Srečanje s tem datumom in nazivom ne obstaja.")
+        
+        id_srecanja = srecanje['id_srecanja']
+
+        # Preveri, ali je član že prijavljen
+        self.cur.execute("""
+            SELECT 1
+            FROM udelezba
+            WHERE id_clana = %s AND id_srecanja = %s
+        """, (id_clana, id_srecanja))
+        
+        if self.cur.fetchone():
+            raise ValueError("Član je že prijavljen na to srečanje.")
+
+        # Vstavi prijavo
+        self.cur.execute("""
+            INSERT INTO udelezba (id_clana, id_srecanja)
+            VALUES (%s, %s)
+        """, (id_clana, id_srecanja))
+        
+        self.conn.commit()
+
+
     def prikazi_prihodnja_srecanja(self) -> List[BralnoSrecanje]:
+        """
+        Vrne seznam vseh bralnih srečanj, ki še niso potekla.
+        """
         self.cur.execute("""
             SELECT 
                 id_srecanja,
@@ -445,60 +335,7 @@ class Repo:
             ORDER BY datum ASC
         """)
         rows = self.cur.fetchall()
-        return [
-            BralnoSrecanje(
-                id_srecanja=row['id_srecanja'],
-                prostor=row['prostor'],
-                datum=row['datum'],
-                naziv_in_opis=row['naziv_in_opis'],
-                id_knjige=row['id_knjige']
-            )
-            for row in rows
-        ]
-
-    def isci_srecanja(self, naziv: Optional[str] = None, datum: Optional[datetime.date] = None) -> List[BralnoSrecanje]:
-        """
-        Iskanje prihodnjih bralnih srečanj po nazivu in/ali datumu.
-        Če parametra ni, se ignorira pri iskanju.
-        Vrača samo srečanja od danes naprej.
-        """
-        query = """
-            SELECT 
-                id_srecanja,
-                prostor,
-                datum,
-                naziv_in_opis,
-                id_knjige
-            FROM bralno_srecanje
-            WHERE datum >= CURRENT_DATE
-        """
-        params = []
-
-        if naziv:
-            query += " AND LOWER(naziv_in_opis) LIKE LOWER(%s)"
-            params.append(f"%{naziv}%")
-        if datum:
-            query += " AND DATE(datum) = %s"
-            params.append(datum)
-
-        query += " ORDER BY datum ASC"
-
-        self.cur.execute(query, params)
-        rows = self.cur.fetchall()
-
-        rezultat = []
-        for row in rows:
-            bs = BralnoSrecanje(
-                id_srecanja=row['id_srecanja'],
-                prostor=row['prostor'],
-                datum=row['datum'],
-                naziv_in_opis=row['naziv_in_opis'],
-                id_knjige=row['id_knjige']
-            )
-            rezultat.append(bs)
-
-        return rezultat
-
+        return [BralnoSrecanje.from_dict(dict(row)) for row in rows]
 
 
 

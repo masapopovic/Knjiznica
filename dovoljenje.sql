@@ -20,3 +20,8 @@ SELECT * FROM bralno_srecanje;
 ALTER TABLE knjiga
 ALTER COLUMN zanr TYPE TEXT[]
 USING string_to_array(trim(both '{}' from zanr), ',');
+
+ALTER TABLE rezervacija
+ADD COLUMN status TEXT NOT NULL DEFAULT 'aktivna'
+CHECK (status_rezervacije IN ('aktivna', 'izpolnjena', 'preklicana'));
+
