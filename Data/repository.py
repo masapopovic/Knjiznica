@@ -3,7 +3,7 @@ psycopg2.extensions.register_type(psycopg2.extensions.UNICODE) # se znebimo prob
 import datetime
 import os
 from typing import List, Optional
-
+from security import verify_password
 
 import auth_public as auth_javnost  # uporabnik javnost
 import auth as auth  # uporabnik jaz
@@ -71,29 +71,31 @@ class Repo:
 
         self.conn.commit()
 
+    
+    def verify_password(plain_password: str, hashed_password: str) -> bool:
+        """
+        Preveri vneseno geslo proti hash-u iz baze.
+        """
+        return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+    
+    
     def dobi_clana_po_uporabniskem_imenu(self, uporabnisko_ime: str) -> Optional[Clan]:
-        """
-        Poišče člana v bazi po uporabniškem imenu.
-        Vrne objekt Clan ali None, če uporabnik ne obstaja.
-        """
         self.cur.execute(
             "SELECT * FROM clan WHERE uporabnisko_ime = %s",
             (uporabnisko_ime,)
         )
         row = self.cur.fetchone()
         if row:
-            return Clan.from_dict(dict(row))  # Pretvorba v Python objekt
+            return Clan.from_dict(dict(row))
         return None
 
     def prijavljeni_uporabnik(self, uporabnisko_ime: str, geslo: str) -> Optional[Clan]:
-        """
-        Preveri geslo in vrne objekt Clan, če je prijava uspešna.
-        Geslo se primerja s hashom v bazi.
-        """
-        clan = self.dobi_clana_po_uporabniskem_imenju(uporabnisko_ime)
-        if clan and verify_password(geslo, clan.geslo):  # verify_password preveri hash
+        clan = self.dobi_clana_po_uporabniskem_imenu(uporabnisko_ime)
+        if clan and verify_password(geslo, clan.geslo):
             return clan
         return None
+
+
 
     def dodaj_clana(self, clan: Clan):
 
