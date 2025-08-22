@@ -117,8 +117,16 @@ class Repo:
         return float(row['povprecje']) if row and row['povprecje'] is not None else None
 
     
-    
-    def dobi_ocene_po_naslovu_in_avtorju(self, naslov_knjige: Optional[str] = None, avtor: Optional[str] = None) -> List[Ocena]:
+    def dobi_ocene_po_naslovu_in_avtorju(
+        self, 
+        naslov_knjige: Optional[str] = None, 
+        ime_avtorja: Optional[str] = None, 
+        priimek_avtorja: Optional[str] = None
+    ) -> List[Ocena]:
+        """
+        Vrne seznam ocen glede na naslov knjige in/ali ime in priimek avtorja.
+        Če je katerikoli argument None, se ignorira pri iskanju.
+        """
         query = """
         SELECT 
             o.id_ocene,
@@ -134,18 +142,21 @@ class Repo:
         WHERE 1=1
         """
         params = []
+        
         if naslov_knjige:
             query += " AND LOWER(k.naslov) = LOWER(%s)"
             params.append(naslov_knjige)
-        if avtor:
-            query += " AND LOWER(a.ime || ' ' || a.priimek) = LOWER(%s)"
-            params.append(avtor)
+        if ime_avtorja:
+            query += " AND LOWER(a.ime) LIKE LOWER(%s)"
+            params.append(f"%{ime_avtorja}%")
+        if priimek_avtorja:
+            query += " AND LOWER(a.priimek) LIKE LOWER(%s)"
+            params.append(f"%{priimek_avtorja}%")
         
         query += " ORDER BY o.id_ocene ASC"
         
         self.cur.execute(query, params)
         return [Ocena.from_dict(dict(row)) for row in self.cur.fetchall()]
-
 
             
 
@@ -174,7 +185,34 @@ class Repo:
         rows = self.cur.fetchall()
         return [Knjiga.from_dict(dict(row)) for row in rows]
     
-    #
+    #knjige po avtorjih
+    def dobi_knjige_po_avtorju(self, ime: Optional[str] = None, priimek: Optional[str] = None) -> List[Knjiga]:
+        """
+        Vrne seznam knjig, ki jih je napisal avtor z določenim imenom in/ali priimkom.
+        Če je ime ali priimek None, se ignorira pri iskanju.
+        """
+        query = """
+        SELECT 
+            k.id_knjige,
+            k.naslov,
+            k.zanr,
+            k.razpolozljivost
+        FROM knjiga k
+        JOIN knjiga_in_avtor ka ON k.id_knjige = ka.id_knjige
+        JOIN avtor a ON ka.id_avtorja = a.id_avtorja
+        WHERE 1=1
+        """
+        params = []
+        if ime:
+            query += " AND LOWER(a.ime) LIKE LOWER(%s)"
+            params.append(f"%{ime}%")
+        if priimek:
+            query += " AND LOWER(a.priimek) LIKE LOWER(%s)"
+            params.append(f"%{priimek}%")
+        
+        self.cur.execute(query, params)
+        return [Knjiga.from_dict(dict(row)) for row in self.cur.fetchall()]
+
 
 
 
