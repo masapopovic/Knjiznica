@@ -207,6 +207,34 @@ class Repo:
         rows = self.cur.fetchall()
         return [Knjiga.from_dict(dict(row)) for row in rows]
     
+    def dobi_knjige_po_avtorju(self, ime: Optional[str] = None, priimek: Optional[str] = None) -> List[Knjiga]:
+        """
+        Vrne seznam knjig, ki jih je napisal avtor z določenim imenom in/ali priimkom.
+        Če je ime ali priimek None, se ignorira pri iskanju.
+        """
+        query = """
+        SELECT 
+            k.id_knjige,
+            k.naslov,
+            k.zanr,
+            k.razpolozljivost
+        FROM knjiga k
+        JOIN knjiga_in_avtor ka ON k.id_knjige = ka.id_knjige
+        JOIN avtor a ON ka.id_avtorja = a.id_avtorja
+        WHERE 1=1
+        """
+        params = []
+        if ime:
+            query += " AND LOWER(a.ime) LIKE LOWER(%s)"
+            params.append(f"%{ime}%")
+        if priimek:
+            query += " AND LOWER(a.priimek) LIKE LOWER(%s)"
+            params.append(f"%{priimek}%")
+        
+        self.cur.execute(query, params)
+        return [Knjiga.from_dict(dict(row)) for row in self.cur.fetchall()]
+
+    
     #Izposoja 
     def izposodi_knjigo(self, id_clana: int, id_knjige: int) -> Optional[Izposoja]:
         # Preveri ali je knjiga na voljo
