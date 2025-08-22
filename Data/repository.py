@@ -221,6 +221,66 @@ class Repo:
             datum_izposoje=izposoja_row['datum_izposoje'],
             rok_vracila=izposoja_row['rok_vracila']
         )
+    # Rezervscija
+    def rezerviraj_knjigo(self, id_clana: int, id_knjige: int) -> Rezervacija:
+        # Preveri ali knjiga obstaja
+        self.cur.execute("""
+            SELECT razpolozljivost FROM knjiga WHERE id_knjige = %s
+        """, (id_knjige,))
+        row = self.cur.fetchone()
+        if not row:
+            raise ValueError("Knjiga s tem ID ne obstaja.")
+
+        danes = datetime.date.today()
+
+        # Pridobi vse prihodnje izposoje
+        self.cur.execute("""
+            SELECT rok_vracila FROM izposoja
+            WHERE id_knjige = %s
+            ORDER BY rok_vracila ASC
+        """, (id_knjige,))
+        izposoje = [r['rok_vracila'] for r in self.cur.fetchall()]
+
+        # Pridobi vse obstoječe rezervacije, urejene po datumu
+        self.cur.execute("""
+            SELECT datum_rezervacije FROM rezervacija
+            WHERE id_knjige = %s
+            ORDER BY datum_rezervacije ASC
+        """, (id_knjige,))
+        rezervacije = [r['datum_rezervacije'] for r in self.cur.fetchall()]
+
+        # Določi prvi prosti datum
+        if row['razpolozljivost'] == 'na voljo' and not izposoje and not rezervacije:
+            # knjiga je prosta, ni izposoj, ni rezervacij
+            naslednji_prosti_datum = danes
+        else:
+            # kombiniramo izposoje in rezervacije v vrstni red
+            vsi_datumi = sorted(izposoje + rezervacije)
+            # zadnji datum + 21 dni
+            if vsi_datumi:
+                zadnji = vsi_datumi[-1]
+                naslednji_prosti_datum = zadnji + datetime.timedelta(days=21)
+            else:
+                naslednji_prosti_datum = danes
+
+        # Vstavi rezervacijo s trenutnim datumom
+        self.cur.execute("""
+            INSERT INTO rezervacija (id_clana, id_knjige, datum_rezervacije)
+            VALUES (%s, %s, %s)
+            RETURNING id_clana, id_knjige, datum_rezervacije
+        """, (id_clana, id_knjige, danes))
+        rezervacija_row = self.cur.fetchone()
+
+        self.conn.commit()
+
+        # Vrni objekt razreda Rezervacija
+        return Rezervacija(
+            id_clana=rezervacija_row['id_clana'],
+            id_knjige=rezervacija_row['id_knjige'],
+            datum_rezervacije=rezervacija_row['datum_rezervacije'],
+            naslednji_prosti_datum=naslednji_prosti_datum  # dodaten atribut v razredu
+        )
+
 
 
 
