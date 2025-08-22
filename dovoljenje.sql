@@ -16,3 +16,7 @@ SELECT * FROM knjiga_in_avtor;
 SELECT * FROM clan;
 SELECT * FROM ocena;
 SELECT * FROM bralno_srecanje;
+
+ALTER TABLE knjiga
+ALTER COLUMN zanr TYPE TEXT[]
+USING string_to_array(trim(both '{}' from zanr), ',');

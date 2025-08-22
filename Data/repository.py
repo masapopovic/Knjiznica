@@ -2,13 +2,14 @@ import psycopg2, psycopg2.extensions, psycopg2.extras, json, bcrypt
 psycopg2.extensions.register_type(psycopg2.extensions.UNICODE) # se znebimo problemov s šumniki
 import datetime
 import os
+from typing import List, Optional
 
 
 import auth_public as auth_javnost  # uporabnik javnost
 import auth as auth  # uporabnik jaz
 
 from models import Clan, ClanDto, Knjiga, Avtor, BralnoSrecanje, Ocena, Izposoja, Rezervacija, KnjigaInAvtor, Udelezba
-from typing import List
+
 
 DB_PORT = os.environ.get('POSTGRES_PORT', 5432)
 
@@ -97,6 +98,7 @@ class Repo:
         self.conn.commit()
 
     
+
 
 
 
