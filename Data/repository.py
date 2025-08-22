@@ -1,4 +1,4 @@
-import psycopg2, psycopg2.extensions, psycopg2.extras, json
+import psycopg2, psycopg2.extensions, psycopg2.extras, json, bcrypt
 psycopg2.extensions.register_type(psycopg2.extensions.UNICODE) # se znebimo problemov s šumniki
 import datetime
 import os
@@ -73,12 +73,38 @@ class Repo:
 
 
 
+    def dodaj_clana(self, clan: Clan):
+
+        # hashiranje gesla
+        hashed = bcrypt.hashpw(clan.geslo.encode("utf-8"), bcrypt.gensalt())
+        hashed_str = hashed.decode("utf-8")  # da ga lahko shraniš kot TEXT
+
+        self.cur.execute("""
+            INSERT INTO clan (ime, priimek, uporabnisko_ime, geslo, email, status_clana)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            RETURNING id_clana
+        """, (
+            clan.ime,
+            clan.priimek,
+            clan.uporabnisko_ime,
+            hashed_str,
+            clan.email,
+            clan.status_clana
+        ))
+
+        # posodobimo id_clana v Python objektu
+        clan.id_clana = self.cur.fetchone()["id_clana"]
+        self.conn.commit()
+
+    
 
 
-# Za uvoz podatkov (admin)
-admin_repo = Repo(admin=True)
-admin_repo.uvozi_knjige_iz_json("Data/knjige.json")
 
-# Za normalno uporabo aplikacije (javnost)
+
+
+#Za uvoz podatkov (admin)
+#admin_repo = Repo(admin=True)
+#admin_repo.uvozi_knjige_iz_json("Data/knjige.json")
+
+#Za normalno uporabo aplikacije (javnost)
 repo = Repo(admin=False)
-# tu potem kliceš funkcije za branje/izposojo knjig itd.
