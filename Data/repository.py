@@ -71,7 +71,29 @@ class Repo:
 
         self.conn.commit()
 
+    def dobi_clana_po_uporabniskem_imenu(self, uporabnisko_ime: str) -> Optional[Clan]:
+        """
+        Poišče člana v bazi po uporabniškem imenu.
+        Vrne objekt Clan ali None, če uporabnik ne obstaja.
+        """
+        self.cur.execute(
+            "SELECT * FROM clan WHERE uporabnisko_ime = %s",
+            (uporabnisko_ime,)
+        )
+        row = self.cur.fetchone()
+        if row:
+            return Clan.from_dict(dict(row))  # Pretvorba v Python objekt
+        return None
 
+    def prijavljeni_uporabnik(self, uporabnisko_ime: str, geslo: str) -> Optional[Clan]:
+        """
+        Preveri geslo in vrne objekt Clan, če je prijava uspešna.
+        Geslo se primerja s hashom v bazi.
+        """
+        clan = self.dobi_clana_po_uporabniskem_imenju(uporabnisko_ime)
+        if clan and verify_password(geslo, clan.geslo):  # verify_password preveri hash
+            return clan
+        return None
 
     def dodaj_clana(self, clan: Clan):
 
@@ -186,7 +208,7 @@ class Repo:
         return [Knjiga.from_dict(dict(row)) for row in rows]
     
     #Izposoja 
-    def izposoji_knjigo(self, id_clana: int, id_knjige: int) -> Optional[Izposoja]:
+    def izposodi_knjigo(self, id_clana: int, id_knjige: int) -> Optional[Izposoja]:
         # Preveri ali je knjiga na voljo
         self.cur.execute("""
             SELECT razpolozljivost FROM knjiga WHERE id_knjige = %s
@@ -294,4 +316,4 @@ class Repo:
 #admin_repo.uvozi_knjige_iz_json("Data/knjige.json")
 
 #Za normalno uporabo aplikacije (javnost)
-repo = Repo(admin=False)
+#repo = Repo(admin=False)
