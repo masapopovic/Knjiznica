@@ -9,7 +9,12 @@ import auth_public as auth_javnost  # uporabnik javnost
 import auth as auth  # uporabnik jaz
 
 from models import Clan, ClanDto, Knjiga, Avtor, BralnoSrecanje, Ocena, Izposoja, Rezervacija, KnjigaInAvtor, Udelezba
+<<<<<<< HEAD
 
+=======
+from typing import List
+from typing import Optional, List
+>>>>>>> 70ed380a9fe2b3062bb4a16df67f50ee21cb8199
 
 DB_PORT = os.environ.get('POSTGRES_PORT', 5432)
 
@@ -96,8 +101,83 @@ class Repo:
         # posodobimo id_clana v Python objektu
         clan.id_clana = self.cur.fetchone()["id_clana"]
         self.conn.commit()
-
     
+    # Ocene
+    def dodaj_oceno(self, o: Ocena):
+        self.cur.execute("""
+                         INSERT INTO ocena (ocena, datum, komentar, id_clana, id_knjige)
+                         VALUES (%s, %s, %s, %s, %s)
+                         """, (
+                             o.ocena, o.datum, o.komentar, o.id_clana, o.id_knjige
+                             ))
+        self.conn.commit()
+        
+        
+    def povprecna_ocena_knjige(self, id_knjige: int) -> Optional[float]:
+        self.cur.execute("""
+                         SELECT ROUND(AVG(ocena)::numeric, 2) AS povprecje
+                         FROM ocena
+                         WHERE id_knjige = %s
+                         """, (id_knjige,))
+        row = self.cur.fetchone()
+        return row['povprecje'] if row and row['povprecje'] is not None else 0
+    
+    
+    def dobi_ocene_po_naslovu_in_avtorju(self, naslov_knjige: Optional[str] = None, avtor: Optional[str] = None) -> List[dict]:
+        query = """
+        SELECT 
+            o.id_ocene,
+            o.ocena,
+            o.datum,
+            o.komentar,
+            o.id_clana,
+            c.ime || ' ' || c.priimek AS clan,
+            k.naslov AS knjiga,
+            k.avtor AS avtor_knjige
+        FROM ocena o
+        JOIN clan c ON o.id_clana = c.id_clana
+        JOIN knjiga k ON o.id_knjige = k.id_knjige
+        WHERE 1=1
+        """
+        params = []
+        if naslov_knjige:
+            query += " AND LOWER(k.naslov) = LOWER(%s)"
+            params.append(naslov_knjige)
+            if avtor:
+                query += " AND LOWER(k.avtor) = LOWER(%s)"
+                params.append(avtor)
+                query += " ORDER BY o.id_ocene ASC"
+                self.cur.execute(query, params)
+                return [dict(row) for row in self.cur.fetchall()]
+            
+
+    def knjige_z_oceno_vecjo_od(self, min_ocena: int) -> List[dict]:
+        self.cur.execute("""
+            SELECT 
+                k.id_knjige,
+                k.naslov,
+                k.avtor,
+                ROUND(AVG(o.ocena)::numeric, 2) AS povprecna_ocena,
+                COUNT(o.id_ocene) AS stevilo_ocen
+            FROM knjiga k
+            JOIN ocena o ON k.id_knjige = o.id_knjige
+            GROUP BY k.id_knjige, k.naslov, k.avtor
+            HAVING AVG(o.ocena) > %s
+            ORDER BY povprecna_ocena DESC
+        """, (min_ocena,))
+        return [dict(row) for row in self.cur.fetchall()]
+    
+    from Data.models import Knjiga
+
+    def poisci_knjige_po_vec_zanrih(self, zanri: list[str]) -> list[Knjiga]:    #lahko iščeš po več žanrih
+        self.cur.execute("""
+            SELECT id_knjige, naslov, zanr, razpolozljivost
+            FROM knjiga
+            WHERE zanr && %s::text[]
+        """, (zanri,))
+        rows = self.cur.fetchall()
+        return [Knjiga.from_dict(dict(row)) for row in rows]
+
 
 
 
