@@ -9,12 +9,6 @@ import auth_public as auth_javnost  # uporabnik javnost
 import auth as auth  # uporabnik jaz
 
 from models import Clan, ClanDto, Knjiga, Avtor, BralnoSrecanje, Ocena, Izposoja, Rezervacija, KnjigaInAvtor, Udelezba
-<<<<<<< HEAD
-
-=======
-from typing import List
-from typing import Optional, List
->>>>>>> 70ed380a9fe2b3062bb4a16df67f50ee21cb8199
 
 DB_PORT = os.environ.get('POSTGRES_PORT', 5432)
 
