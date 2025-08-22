@@ -280,6 +280,106 @@ class Repo:
             datum_rezervacije=rezervacija_row['datum_rezervacije'],
             naslednji_prosti_datum=naslednji_prosti_datum  # dodaten atribut v razredu
         )
+    
+    def cakalna_vrsta_knjige(self, id_knjige: int) -> List[Rezervacija]:
+        # Preveri, ali knjiga obstaja
+        self.cur.execute("""
+            SELECT naslov FROM knjiga WHERE id_knjige = %s
+        """, (id_knjige,))
+        row = self.cur.fetchone()
+        if not row:
+            raise ValueError("Knjiga s tem ID ne obstaja.")
+
+        danes = datetime.date.today()
+
+        # Pridobi vse prihodnje izposoje
+        self.cur.execute("""
+            SELECT rok_vracila FROM izposoja
+            WHERE id_knjige = %s
+            ORDER BY rok_vracila ASC
+        """, (id_knjige,))
+        izposoje = [r['rok_vracila'] for r in self.cur.fetchall()]
+
+        # Pridobi vse rezervacije, urejene po datumu
+        self.cur.execute("""
+            SELECT id_clana, datum_rezervacije FROM rezervacija
+            WHERE id_knjige = %s
+            ORDER BY datum_rezervacije ASC
+        """, (id_knjige,))
+        rezervacije_rows = self.cur.fetchall()
+
+        # Izračunamo naslednji prosti datum za vsako rezervacijo
+        vsi_datumi = sorted(izposoje)
+        cakalna_lista = []
+
+        for rez in rezervacije_rows:
+            if not vsi_datumi:
+                naslednji_prosti = danes
+            else:
+                zadnji = vsi_datumi[-1]
+                naslednji_prosti = zadnji + datetime.timedelta(days=21)
+            vsi_datumi.append(naslednji_prosti)
+            cakalna_lista.append(
+                Rezervacija(
+                    id_clana=rez['id_clana'],
+                    id_knjige=id_knjige,
+                    datum_rezervacije=rez['datum_rezervacije'],
+                    naslednji_prosti_datum=naslednji_prosti
+                )
+            )
+
+        return cakalna_lista
+    
+    
+    def cakalna_vrsta_s_pozicijo(self, id_knjige: int) -> List[Rezervacija]:
+        # Preveri, ali knjiga obstaja
+        self.cur.execute("""
+            SELECT naslov FROM knjiga WHERE id_knjige = %s
+        """, (id_knjige,))
+        row = self.cur.fetchone()
+        if not row:
+            raise ValueError("Knjiga s tem ID ne obstaja.")
+
+        danes = datetime.date.today()
+
+        # Pridobi vse prihodnje izposoje
+        self.cur.execute("""
+            SELECT rok_vracila FROM izposoja
+            WHERE id_knjige = %s
+            ORDER BY rok_vracila ASC
+        """, (id_knjige,))
+        izposoje = [r['rok_vracila'] for r in self.cur.fetchall()]
+
+        # Pridobi vse rezervacije, urejene po datumu
+        self.cur.execute("""
+            SELECT id_clana, datum_rezervacije FROM rezervacija
+            WHERE id_knjige = %s
+            ORDER BY datum_rezervacije ASC
+        """, (id_knjige,))
+        rezervacije_rows = self.cur.fetchall()
+
+        vsi_datumi = sorted(izposoje)
+        cakalna_lista = []
+
+        for idx, rez in enumerate(rezervacije_rows, start=1):
+            if not vsi_datumi:
+                naslednji_prosti = danes
+            else:
+                zadnji = vsi_datumi[-1]
+                naslednji_prosti = zadnji + datetime.timedelta(days=21)
+            vsi_datumi.append(naslednji_prosti)
+            cakalna_lista.append(
+                Rezervacija(
+                    id_clana=rez['id_clana'],
+                    id_knjige=id_knjige,
+                    datum_rezervacije=rez['datum_rezervacije'],
+                    naslednji_prosti_datum=naslednji_prosti,
+                    pozicija_v_vrsti=idx  # nova informacija o poziciji
+                )
+            )
+
+        return cakalna_lista
+
 
 
 
