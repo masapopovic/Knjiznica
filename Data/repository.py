@@ -185,7 +185,43 @@ class Repo:
         rows = self.cur.fetchall()
         return [Knjiga.from_dict(dict(row)) for row in rows]
     
-    #
+    #Izposoja 
+    def izposoji_knjigo(self, id_clana: int, id_knjige: int) -> Optional[Izposoja]:
+        # Preveri ali je knjiga na voljo
+        self.cur.execute("""
+            SELECT razpolozljivost FROM knjiga WHERE id_knjige = %s
+        """, (id_knjige,))
+        row = self.cur.fetchone()
+        if not row:
+            raise ValueError("Knjiga s tem ID ne obstaja.")
+        if row['razpolozljivost'] != 'na voljo':
+            raise ValueError("Knjiga trenutno ni na voljo za izposojo.")
+
+        # Vstavi izposojo
+        self.cur.execute("""
+            INSERT INTO izposoja (id_clana, id_knjige)
+            VALUES (%s, %s)
+            RETURNING id_clana, id_knjige, datum_izposoje, rok_vracila
+        """, (id_clana, id_knjige))
+        izposoja_row = self.cur.fetchone()
+
+        # Posodobi razpoložljivost knjige
+        self.cur.execute("""
+            UPDATE knjiga
+            SET razpolozljivost = 'ni na voljo'
+            WHERE id_knjige = %s
+        """, (id_knjige,))
+
+        self.conn.commit()
+
+        # Vrni objekt razreda Izposoja
+        return Izposoja(
+            id_clana=izposoja_row['id_clana'],
+            id_knjige=izposoja_row['id_knjige'],
+            datum_izposoje=izposoja_row['datum_izposoje'],
+            rok_vracila=izposoja_row['rok_vracila']
+        )
+
 
 
 
