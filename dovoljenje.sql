@@ -11,3 +11,8 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO javnost;
 
 SELECT * FROM knjiga;
 SELECT * FROM avtor;
+SELECT * FROM knjiga_in_avtor;
+
+SELECT * FROM clan;
+SELECT * FROM ocena;
+SELECT * FROM bralno_srecanje;

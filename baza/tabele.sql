@@ -9,6 +9,7 @@ CREATE TABLE clan (
 );
 
 
+
 CREATE TABLE knjiga (
     id_knjige SERIAL PRIMARY KEY,
     naslov TEXT NOT NULL,
