@@ -401,7 +401,31 @@ class Repo:
             )
 
         return cakalna_lista
-
+    
+    #Bralno srecanje
+    def prikazi_prihodnja_srecanja(self) -> List[BralnoSrecanje]:
+        self.cur.execute("""
+            SELECT 
+                id_srecanja,
+                prostor,
+                datum,
+                naziv_in_opis,
+                id_knjige
+            FROM bralno_srecanje
+            WHERE datum >= CURRENT_DATE
+            ORDER BY datum ASC
+        """)
+        rows = self.cur.fetchall()
+        return [
+            BralnoSrecanje(
+                id_srecanja=row['id_srecanja'],
+                prostor=row['prostor'],
+                datum=row['datum'],
+                naziv_in_opis=row['naziv_in_opis'],
+                id_knjige=row['id_knjige']
+            )
+            for row in rows
+        ]
 
 
 
