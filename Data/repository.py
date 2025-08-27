@@ -87,6 +87,7 @@ class Repo:
         if row:
             return Clan.from_dict(dict(row))
         return None
+    
 
     def prijavljeni_uporabnik(self, uporabnisko_ime: str, geslo: str) -> Optional[Clan]:
         clan = self.dobi_clana_po_uporabniskem_imenu(uporabnisko_ime)
