@@ -9,23 +9,16 @@ CREATE TABLE clan (
 );
 
 
-
-CREATE TABLE knjiga (
-    id_knjige SERIAL PRIMARY KEY,
-    naslov TEXT NOT NULL,
-    zanr TEXT NOT NULL,
-    razpolozljivost TEXT NOT NULL CHECK (razpolozljivost IN ('na voljo', 'ni na voljo'))
-);
-
-CREATE TABLE zanr (
-    id_zanra SERIAL PRIMARY KEY,
-    ime_zanra TEXT NOT NULL UNIQUE
-);
-
 CREATE TABLE knjiga (
     id_knjige SERIAL PRIMARY KEY,
     naslov TEXT NOT NULL,
     razpolozljivost TEXT NOT NULL CHECK (razpolozljivost IN ('na voljo', 'ni na voljo')),
+);
+
+
+CREATE TABLE zanr (
+    id_zanra SERIAL PRIMARY KEY,
+    ime_zanra TEXT NOT NULL UNIQUE
 );
 
 
@@ -73,7 +66,6 @@ CREATE TABLE vracila (
     id_knjige INT NOT NULL REFERENCES knjiga(id_knjige),
     datum_vracila DATE NOT NULL DEFAULT CURRENT_DATE
 );
-
 
 
 CREATE TABLE knjiga_in_avtor (
