@@ -12,7 +12,7 @@ CREATE TABLE clan (
 CREATE TABLE knjiga (
     id_knjige SERIAL PRIMARY KEY,
     naslov TEXT NOT NULL,
-    razpolozljivost TEXT NOT NULL CHECK (razpolozljivost IN ('na voljo', 'ni na voljo')),
+    razpolozljivost TEXT NOT NULL CHECK (razpolozljivost IN ('na voljo', 'ni na voljo'))
 );
 
 
@@ -58,7 +58,7 @@ CREATE TABLE izposoja (
     PRIMARY KEY (id_clana, id_knjige, datum_izposoje),
     FOREIGN KEY (id_clana) REFERENCES clan(id_clana),
     FOREIGN KEY (id_knjige) REFERENCES knjiga(id_knjige)
-)
+);
 
 CREATE TABLE vracila (
     id_vracila SERIAL PRIMARY KEY,
@@ -74,15 +74,15 @@ CREATE TABLE knjiga_in_avtor (
     PRIMARY KEY (id_avtorja, id_knjige),
     FOREIGN KEY (id_avtorja) REFERENCES avtor(id_avtorja),
     FOREIGN KEY (id_knjige) REFERENCES knjiga(id_knjige)
-)
+);
 
 CREATE TABLE udelezba (
     id_srecanja INT NOT NULL,
     id_clana INT NOT NULL,
     PRIMARY KEY (id_srecanja, id_clana),
     FOREIGN KEY (id_srecanja) REFERENCES bralno_srecanje(id_srecanja),
-    FOREIGN KEY (id_clana) REFERENCES clan(id_clana),
-)
+    FOREIGN KEY (id_clana) REFERENCES clan(id_clana)
+);
 
 CREATE TABLE knjiga_in_zanr (
     id_knjige INT NOT NULL,

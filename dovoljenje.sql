@@ -12,6 +12,7 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO javnost;
 SELECT * FROM knjiga;
 SELECT * FROM avtor;
 SELECT * FROM knjiga_in_avtor;
+SELECT * FROM knjiga_in_zanr;
 
 SELECT * FROM clan;
 SELECT * FROM ocena;
@@ -25,3 +26,6 @@ ALTER TABLE rezervacija
 ADD COLUMN status TEXT NOT NULL DEFAULT 'aktivna'
 CHECK (status_rezervacije IN ('aktivna', 'izpolnjena', 'preklicana'));
 
+DROP TABLE IF EXISTS clan, knjiga, avtor, bralno_srecanje, ocena,
+                      izposoja, vracila, knjiga_in_avtor, zanr,
+                      knjiga_in_zanr, udelezba CASCADE;

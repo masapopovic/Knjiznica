@@ -55,17 +55,16 @@ class Repo:
             if avtor:
                 id_avtorja = avtor['id_avtorja']
             else:
-                # Vstavimo novega avtorja
                 self.cur.execute(
                     "INSERT INTO avtor (ime, priimek) VALUES (%s, %s) RETURNING id_avtorja",
                     (knjiga['ime_avtorja'], knjiga['priimek_avtorja'])
                 )
                 id_avtorja = self.cur.fetchone()['id_avtorja']
 
-            # Vstavimo knjigo
+            # Vstavimo knjigo 
             self.cur.execute(
-                "INSERT INTO knjiga (naslov, zanr, razpolozljivost) VALUES (%s, %s, %s) RETURNING id_knjige",
-                (knjiga['naslov'], knjiga['žanri'], 'na voljo')
+                "INSERT INTO knjiga (naslov, razpolozljivost) VALUES (%s, %s) RETURNING id_knjige",
+                (knjiga['naslov'], 'na voljo')
             )
             id_knjige = self.cur.fetchone()['id_knjige']
 
@@ -75,7 +74,32 @@ class Repo:
                 (id_knjige, id_avtorja)
             )
 
+            # obdelava žanrov
+            for ime_zanra in knjiga['žanri']:
+                # preverimo ali žanr že obstaja
+                self.cur.execute(
+                    "SELECT id_zanra FROM zanr WHERE ime_zanra = %s",
+                    (ime_zanra,)
+                )
+                zanr = self.cur.fetchone()
+                if zanr:
+                    id_zanra = zanr['id_zanra']
+                else:
+                    # dodamo nov žanr
+                    self.cur.execute(
+                        "INSERT INTO zanr (ime_zanra) VALUES (%s) RETURNING id_zanra",
+                        (ime_zanra,)
+                    )
+                    id_zanra = self.cur.fetchone()['id_zanra']
+
+                # povežemo knjigo z žanrom
+                self.cur.execute(
+                    "INSERT INTO knjiga_in_zanr (id_knjige, id_zanra) VALUES (%s, %s) ON CONFLICT DO NOTHING",
+                    (id_knjige, id_zanra)
+                )
+
         self.conn.commit()
+
     
     
     def dobi_clana_po_uporabniskem_imenu(self, uporabnisko_ime: str) -> Optional[Clan]:
@@ -362,8 +386,8 @@ class Repo:
 
 
 #Za uvoz podatkov (admin)
-#admin_repo = Repo(admin=True)
-#admin_repo.uvozi_knjige_iz_json("Data/knjige.json")
+admin_repo = Repo(admin=True)
+admin_repo.uvozi_knjige_iz_json("Data/knjige.json")
 
 #Za normalno uporabo aplikacije (javnost)
 #repo = Repo(admin=False)
