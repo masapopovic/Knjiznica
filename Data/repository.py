@@ -86,8 +86,8 @@ class Repo:
         row = self.cur.fetchone()
         if row:
             return Clan.from_dict(dict(row))
-        return None
-    
+        return None   
+
 
     def prijavljeni_uporabnik(self, uporabnisko_ime: str, geslo: str) -> Optional[Clan]:
         clan = self.dobi_clana_po_uporabniskem_imenu(uporabnisko_ime)
@@ -95,6 +95,23 @@ class Repo:
             return clan
         return None
 
+    def dodaj_clana(self, clan: Clan) -> Clan:
+        self.cur.execute("""
+            INSERT INTO clan (ime, priimek, uporabnisko_ime, geslo, email, status_clana, role)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            RETURNING id_clana
+        """, (
+            clan.ime,
+            clan.priimek,
+            clan.uporabnisko_ime,
+            clan.password_hash,   
+            clan.email,
+            clan.status_clana,
+            clan.role
+        ))
+        clan.id_clana = self.cur.fetchone()["id_clana"]
+        self.conn.commit()
+        return clan
 
     def dodaj_clana(self, clan: Clan):
 

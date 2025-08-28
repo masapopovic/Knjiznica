@@ -17,6 +17,18 @@ CREATE TABLE knjiga (
     razpolozljivost TEXT NOT NULL CHECK (razpolozljivost IN ('na voljo', 'ni na voljo'))
 );
 
+CREATE TABLE zanr (
+    id_zanra SERIAL PRIMARY KEY,
+    ime_zanra TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE knjiga (
+    id_knjige SERIAL PRIMARY KEY,
+    naslov TEXT NOT NULL,
+    razpolozljivost TEXT NOT NULL CHECK (razpolozljivost IN ('na voljo', 'ni na voljo')),
+);
+
+
 CREATE TABLE avtor (
     id_avtorja SERIAL PRIMARY KEY,
     ime TEXT NOT NULL,
@@ -79,3 +91,11 @@ CREATE TABLE udelezba (
     FOREIGN KEY (id_srecanja) REFERENCES bralno_srecanje(id_srecanja),
     FOREIGN KEY (id_clana) REFERENCES clan(id_clana),
 )
+
+CREATE TABLE knjiga_in_zanr (
+    id_knjige INT NOT NULL,
+    id_zanra INT NOT NULL,
+    PRIMARY KEY (id_knjige, id_zanra),
+    FOREIGN KEY (id_knjige) REFERENCES knjiga(id_knjige),
+    FOREIGN KEY (id_zanra) REFERENCES zanr(id_zanra)
+);
