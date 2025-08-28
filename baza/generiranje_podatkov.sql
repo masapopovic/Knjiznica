@@ -22,6 +22,6 @@ INSERT INTO clan (ime, priimek, uporabnisko_ime, geslo, email, status_clana) VAL
 INSERT INTO ocena (ocena, datum, komentar, id_clana, id_knjige) VALUES
 (5, '2025-08-21', 'Odlična knjiga, zelo priporočam!', 1, 1),
 (4, '2025-08-20', 'Zanimiva zgodba, nekaj delov bi lahko bili krajši.', 2, 5),
-(3, '2025-08-19', 'Povprečna knjiga, nič posebnega.', 4, 3),
+(3, '2025-08-19', 'Povprečna knjiga, nič posebnega.', 4, 3),6
 (2, '2025-08-18', 'Nisem bil navdušen, stil pisanja ni bil všeč.', 4,1),
 (5, '2025-08-17', 'Neverjetna knjiga, prebrala bi še več od tega avtorja!', 3, 5);

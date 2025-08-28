@@ -199,82 +199,58 @@ class Repo:
 
             
 
-    def knjige_z_oceno_vecjo_od(self, min_ocena: int) -> List[Knjiga]:
-        self.cur.execute("""
-            SELECT 
-                k.id_knjige,
-                k.naslov,
-                k.razpolozljivost
-            FROM knjiga k
-            JOIN ocena o ON k.id_knjige = o.id_knjige
-            GROUP BY k.id_knjige, k.naslov, k.razpolozljivost
-            HAVING AVG(o.ocena) > %s
-            ORDER BY AVG(o.ocena) DESC
-        """, (min_ocena,))
-        
-        return [Knjiga.from_dict(dict(row)) for row in self.cur.fetchall()]
 
-
-    #knjige po žanrih
-    def poisci_knjige_po_vec_zanrih(self, zanri: list[str]) -> list[Knjiga]:
+    #knjige po žanrih, avtorjih, naslovih ter povp. oceni
+    def poisci_knjige(self, naslov: str = None, avtor: str = None, zanri: list[str] = None, min_ocena: int = None) -> list[Knjiga]:
         """
-        Vrne knjige, ki imajo vse podane žanre.
-        Če vneseš npr. ["fantasy", "fiction"], bodo vrnjene le knjige,
-        ki so označene z obema žanroma.
+        Išče knjige glede na naslov, avtorja, žanre in minimalno povprečno oceno.
+        Vrača vse ustrezne knjige.
         """
         query = """
-            SELECT k.id_knjige, k.naslov, k.razpolozljivost
+            SELECT DISTINCT k.id_knjige, k.naslov, k.razpolozljivost
             FROM knjiga k
-            JOIN knjiga_in_zanr kz ON k.id_knjige = kz.id_knjige
-            JOIN zanr z ON kz.id_zanra = z.id_zanra
-            WHERE LOWER(z.ime_zanra) = ANY(%s)
-            GROUP BY k.id_knjige, k.naslov, k.razpolozljivost
-            HAVING COUNT(DISTINCT z.ime_zanra) = %s
-        """
-        self.cur.execute(query, (zanri, len(zanri)))
-        rows = self.cur.fetchall()
-        return [Knjiga.from_dict(dict(row)) for row in rows]
-
-    
-    def dobi_knjige_po_avtorju(self, ime: Optional[str] = None, priimek: Optional[str] = None) -> List[Knjiga]:
-        """
-        Vrne seznam knjig, ki jih je napisal avtor z določenim imenom in/ali priimkom.
-        Če je ime ali priimek None, se ignorira pri iskanju.
-        """
-        query = """
-        SELECT 
-            k.id_knjige,
-            k.naslov,
-            k.zanr,
-            k.razpolozljivost
-        FROM knjiga k
-        JOIN knjiga_in_avtor ka ON k.id_knjige = ka.id_knjige
-        JOIN avtor a ON ka.id_avtorja = a.id_avtorja
-        WHERE 1=1
+            LEFT JOIN knjiga_in_avtor ka ON k.id_knjige = ka.id_knjige
+            LEFT JOIN avtor a ON ka.id_avtorja = a.id_avtorja
+            LEFT JOIN knjiga_in_zanr kz ON k.id_knjige = kz.id_knjige
+            LEFT JOIN zanr z ON kz.id_zanra = z.id_zanra
+            LEFT JOIN ocena o ON k.id_knjige = o.id_knjige
+            WHERE 1=1
         """
         params = []
-        if ime:
-            query += " AND LOWER(a.ime) LIKE LOWER(%s)"
-            params.append(f"%{ime}%")
-        if priimek:
-            query += " AND LOWER(a.priimek) LIKE LOWER(%s)"
-            params.append(f"%{priimek}%")
+
+        if naslov:
+            query += " AND LOWER(k.naslov) LIKE LOWER(%s)"
+            params.append(f"%{naslov}%")
+        if avtor:
+            query += " AND (LOWER(a.ime) LIKE LOWER(%s) OR LOWER(a.priimek) LIKE LOWER(%s))"
+            params.extend([f"%{avtor}%", f"%{avtor}%"])
+        if zanri:
+            query += " AND LOWER(z.ime_zanra) = ANY(%s)"
+            params.append(zanri)
+        if min_ocena:
+            query += " GROUP BY k.id_knjige HAVING AVG(o.ocena) >= %s"
+            params.append(min_ocena)
         
+        query += " ORDER BY k.razpolozljivost DESC"
+
         self.cur.execute(query, params)
-        return [Knjiga.from_dict(dict(row)) for row in self.cur.fetchall()]
+        rows = self.cur.fetchall()
+        return [Knjiga.from_dict(dict(row)) for row in rows]
 
     
     def dobi_knjigo_po_id(self, id_knjige: int):
         self.cur.execute("SELECT * FROM knjiga WHERE id_knjige = %s", (id_knjige,))
         return self.cur.fetchone()
     
+    def dobi_avtorje_knjige(self, id_knjige: int):
+        self.cur.execute("""
+            SELECT a.ime, a.priimek
+            FROM avtor a
+            JOIN knjiga_in_avtor ka ON a.id_avtorja = ka.id_avtorja
+            WHERE ka.id_knjige = %s
+        """, (id_knjige,))
+        return self.cur.fetchall()  # vrne seznam dict: [{'ime':..., 'priimek':...}, ...]
 
-    def dobi_knjige_po_naslovu(self, naslov: str):
-        self.cur.execute(
-            "SELECT * FROM knjiga WHERE naslov = %s",
-            (naslov,)
-        )
-        return self.cur.fetchall()
 
     #izposoja
     def dodaj_izposojo(self, id_clana: int, id_knjige: int):
@@ -290,6 +266,16 @@ class Repo:
         )
         self.conn.commit()
 
+    # Izposojene knjige
+    def dobi_izposojene_knjige(self, id_clana: int) -> list[Knjiga]:
+        self.cur.execute("""
+            SELECT k.id_knjige, k.naslov, k.razpolozljivost, i.rok_vracila
+            FROM izposoja i
+            JOIN knjiga k ON i.id_knjige = k.id_knjige
+            WHERE i.id_clana = %s AND i.vraceno = FALSE
+        """, (id_clana,))
+        rows = self.cur.fetchall()
+        return [Knjiga.from_dict(dict(row)) for row in rows]
         
     #vračilo 
     def dodaj_vracilo(self, id_clana: int, id_knjige: int):
@@ -303,12 +289,27 @@ class Repo:
     #Bralno srecanje
 
     # Poišči srečanje po datumu in nazivu
-    def get_srecanje(self, datum: str, naziv: str):
-        self.cur.execute(
-            "SELECT id_srecanja FROM bralno_srecanje WHERE datum = %s AND LOWER(naziv_in_opis) = LOWER(%s)",
-            (datum, naziv)
-        )
-        return self.cur.fetchone()
+    def isci_prihodnja_srecanja(self, naziv: str = None, datum: str = None) -> list[BralnoSrecanje]:
+        query = """
+            SELECT * FROM bralno_srecanje
+            WHERE datum >= CURRENT_DATE
+        """
+        params = []
+
+        if naziv:
+            query += " AND LOWER(naziv_in_opis) LIKE LOWER(%s)"
+            params.append(f"%{naziv}%")
+
+        if datum:
+            query += " AND datum::date = %s"
+            params.append(datum)
+
+        query += " ORDER BY datum ASC"
+
+        self.cur.execute(query, params)
+        rows = self.cur.fetchall()
+        return [BralnoSrecanje.from_dict(dict(row)) for row in rows]
+
 
     # Preveri, ali je član že prijavljen
     def preveri_udelezbo(self, id_clana: int, id_srecanja: int):
@@ -344,6 +345,34 @@ class Repo:
         """)
         rows = self.cur.fetchall()
         return [BralnoSrecanje.from_dict(dict(row)) for row in rows]
+    
+    def prihodnja_srecanja_po_clanu(self, id_clana: int) -> list[BralnoSrecanje]:
+        """
+        Vrne seznam vseh prihodnjih bralnih srečanj, na katera je prijavljen določen član.
+        """
+        self.cur.execute("""
+            SELECT bs.id_srecanja, bs.prostor, bs.datum, bs.naziv_in_opis, bs.id_knjige
+            FROM bralno_srecanje bs
+            JOIN udelezba u ON bs.id_srecanja = u.id_srecanja
+            WHERE u.id_clana = %s AND bs.datum >= CURRENT_DATE
+            ORDER BY bs.datum ASC
+        """, (id_clana,))
+
+        rows = self.cur.fetchall()
+        return [BralnoSrecanje.from_dict(dict(row)) for row in rows]
+    
+    def najdi_nazive(self, fragment: str) -> list[str]:
+        self.cur.execute("""
+            SELECT DISTINCT naziv_in_opis
+            FROM bralno_srecanje
+            WHERE LOWER(naziv_in_opis) LIKE LOWER(%s)
+            ORDER BY naziv_in_opis ASC
+            LIMIT 10
+        """, (f"%{fragment}%",))
+
+        return [row['naziv_in_opis'] for row in self.cur.fetchall()]
+
+
 
 
 

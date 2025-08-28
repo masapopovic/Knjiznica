@@ -37,12 +37,18 @@ class OcenaService:
         if not (1 <= ocena <= 5):
             raise ValueError("Ocena mora biti med 1 in 5.")
 
-        nova_ocena = Ocena(
-            ocena=ocena,
-            datum=None,  # repo lahko nastavi trenutni datum
-            komentar=komentar,
-            id_clana=id_clana,
-            id_knjige=id_knjige
-        )
+        # Dobi podatke knjige po ID
+        knjiga = self.repo.dobi_knjigo_po_id(id_knjige)
 
-        self.repo.dodaj_oceno(nova_ocena)
+        # Poišči vse izvole iste knjige (isti naslov + avtor)
+        vse_izvode = self.repo.poisci_knjige(naslov=knjiga.naslov, avtor=knjiga.avtor_priimek)
+        
+        for k in vse_izvode:
+            nova_ocena = Ocena(
+                ocena=ocena,
+                datum=None,  # repo nastavi trenutni datum
+                komentar=komentar,
+                id_clana=id_clana,
+                id_knjige=k.id_knjige
+            )
+            self.repo.dodaj_oceno(nova_ocena)

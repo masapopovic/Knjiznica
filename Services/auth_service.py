@@ -68,3 +68,4 @@ class AuthService:
             uporabnisko_ime=clan.uporabnisko_ime,
             status_clana=clan.status_clana
         )
+
