@@ -34,9 +34,13 @@ class ClanDto:
 class Knjiga:
     id_knjige: int = field(default=0)
     naslov: str = field(default="")
-    zanr: str = field(default="")
     razpolozljivost: str = field(default="na voljo")
 
+@dataclass_json
+@dataclass
+class Zanr:
+    id_zanra: int = field(default=0)
+    ime_zanra: str = field(default="")
 
 @dataclass_json
 @dataclass
@@ -97,3 +101,9 @@ class KnjigaInAvtor:
 class Udelezba:
     id_srecanja: int = field(default=0)
     id_clana: int = field(default=0)
+
+@dataclass_json
+@dataclass
+class KnjigaInZanr:
+    id_knjige: int = field(default=0)
+    id_zanra: int = field(default=0)
