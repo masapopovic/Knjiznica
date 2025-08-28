@@ -95,7 +95,16 @@ class Repo:
 
         self.conn.commit()
 
-    
+    def dobi_clana_po_id(self, id_clana: int) -> Optional[Clan]:
+        self.cur.execute(
+            "SELECT * FROM clan WHERE id_clana = %s",
+            (id_clana,)
+        )
+        row = self.cur.fetchone()
+        if row:
+            return Clan.from_dict(dict(row))
+        return None
+
     
     def dobi_clana_po_uporabniskem_imenu(self, uporabnisko_ime: str) -> Optional[Clan]:
         self.cur.execute(
