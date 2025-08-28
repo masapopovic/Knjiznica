@@ -10,7 +10,6 @@ from typing import Optional
 @dataclass
 class Clan:
     id_clana: int = field(default=0)
-    role: str = field(default="")
     ime: str = field(default="")
     priimek: str = field(default="")
     uporabnisko_ime: str = field(default="")

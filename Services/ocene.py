@@ -15,6 +15,7 @@ class OcenaService:
         Vrne povprečno oceno za izbrano knjigo.
         """
         return self.repo.povprecna_ocena_knjige(id_knjige)
+    
 
     def ocene_po_naslovu_in_avtorju(
         self, 
@@ -45,6 +46,3 @@ class OcenaService:
         )
 
         self.repo.dodaj_oceno(nova_ocena)
-
-
-            

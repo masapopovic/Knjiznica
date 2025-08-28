@@ -29,3 +29,12 @@ CHECK (status_rezervacije IN ('aktivna', 'izpolnjena', 'preklicana'));
 DROP TABLE IF EXISTS clan, knjiga, avtor, bralno_srecanje, ocena,
                       izposoja, vracila, knjiga_in_avtor, zanr,
                       knjiga_in_zanr, udelezba CASCADE;
+
+ALTER TABLE clan
+ADD COLUMN role TEXT NOT NULL DEFAULT 'clan'
+CHECK (role IN ('clan', 'admin'));
+
+ALTER TABLE clan
+DROP COLUMN role;
+
+

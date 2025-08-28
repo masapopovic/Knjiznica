@@ -9,7 +9,7 @@ class AuthService:
         #uporabi javnega uporabnika za vse operacije
         self.repo = Repo(admin=False)
 
-    def registracija_clana(self, ime: str, priimek: str, uporabnisko_ime: str, geslo: str, email: str, role: str = "user") -> ClanDto:
+    def registracija_clana(self, ime: str, priimek: str, uporabnisko_ime: str, geslo: str, email: str) -> ClanDto:
         # Preveri, ali uporabniško ime že obstaja
         obstojeci = self.repo.dobi_clana_po_uporabniskem_imenu(uporabnisko_ime)
         if obstojeci:
@@ -26,7 +26,6 @@ class AuthService:
             uporabnisko_ime=uporabnisko_ime,
             password_hash=geslo_hash_str,
             email=email,
-            role=role,
             status_clana="aktiven"
         )
 

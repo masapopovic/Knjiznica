@@ -119,8 +119,8 @@ class Repo:
 
     def dodaj_clana(self, clan: Clan) -> Clan:
         self.cur.execute("""
-            INSERT INTO clan (ime, priimek, uporabnisko_ime, geslo, email, status_clana, role)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO clan (ime, priimek, uporabnisko_ime, geslo, email, status_clana)
+            VALUES (%s, %s, %s, %s, %s, %s)
             RETURNING id_clana
         """, (
             clan.ime,
@@ -128,8 +128,7 @@ class Repo:
             clan.uporabnisko_ime,
             clan.password_hash,   
             clan.email,
-            clan.status_clana,
-            clan.role
+            clan.status_clana
         ))
         clan.id_clana = self.cur.fetchone()["id_clana"]
         self.conn.commit()
