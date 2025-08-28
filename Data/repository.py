@@ -12,11 +12,6 @@ from models import Clan, ClanDto, Knjiga, Avtor, BralnoSrecanje, Ocena, Izposoja
 
 DB_PORT = os.environ.get('POSTGRES_PORT', 5432)
 
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """
-    Preveri vneseno geslo proti hash-u iz baze.
-    """
-    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
 class Repo:
     def __init__(self, admin=False):
@@ -113,12 +108,6 @@ class Repo:
         return None   
 
 
-    def prijavljeni_uporabnik(self, uporabnisko_ime: str, geslo: str) -> Optional[Clan]:
-        clan = self.dobi_clana_po_uporabniskem_imenu(uporabnisko_ime)
-        if clan and verify_password(geslo, clan.geslo):
-            return clan
-        return None
-
     def dodaj_clana(self, clan: Clan) -> Clan:
         self.cur.execute("""
             INSERT INTO clan (ime, priimek, uporabnisko_ime, geslo, email, status_clana, role)
@@ -137,29 +126,7 @@ class Repo:
         self.conn.commit()
         return clan
 
-    def dodaj_clana(self, clan: Clan):
 
-        # hashiranje gesla
-        hashed = bcrypt.hashpw(clan.geslo.encode("utf-8"), bcrypt.gensalt())
-        hashed_str = hashed.decode("utf-8")  # da ga lahko shraniš kot TEXT
-
-        self.cur.execute("""
-            INSERT INTO clan (ime, priimek, uporabnisko_ime, geslo, email, status_clana)
-            VALUES (%s, %s, %s, %s, %s, %s)
-            RETURNING id_clana
-        """, (
-            clan.ime,
-            clan.priimek,
-            clan.uporabnisko_ime,
-            hashed_str,
-            clan.email,
-            clan.status_clana
-        ))
-
-        # posodobimo id_clana v Python objektu
-        clan.id_clana = self.cur.fetchone()["id_clana"]
-        self.conn.commit()
-    
     # Ocene
     def dodaj_oceno(self, o: Ocena):
         self.cur.execute("""
@@ -229,25 +196,37 @@ class Repo:
             SELECT 
                 k.id_knjige,
                 k.naslov,
-                k.zanr,
                 k.razpolozljivost
             FROM knjiga k
             JOIN ocena o ON k.id_knjige = o.id_knjige
-            GROUP BY k.id_knjige, k.naslov, k.zanr, k.razpolozljivost
+            GROUP BY k.id_knjige, k.naslov, k.razpolozljivost
             HAVING AVG(o.ocena) > %s
             ORDER BY AVG(o.ocena) DESC
         """, (min_ocena,))
+        
         return [Knjiga.from_dict(dict(row)) for row in self.cur.fetchall()]
 
+
     #knjige po žanrih
-    def poisci_knjige_po_vec_zanrih(self, zanri: list[str]) -> list[Knjiga]:    #lahko iščeš po več žanrih
-        self.cur.execute("""
-            SELECT id_knjige, naslov, zanr, razpolozljivost
-            FROM knjiga
-            WHERE zanr && %s::text[]
-        """, (zanri,))
+    def poisci_knjige_po_vec_zanrih(self, zanri: list[str]) -> list[Knjiga]:
+        """
+        Vrne knjige, ki imajo vse podane žanre.
+        Če vneseš npr. ["fantasy", "fiction"], bodo vrnjene le knjige,
+        ki so označene z obema žanroma.
+        """
+        query = """
+            SELECT k.id_knjige, k.naslov, k.razpolozljivost
+            FROM knjiga k
+            JOIN knjiga_in_zanr kz ON k.id_knjige = kz.id_knjige
+            JOIN zanr z ON kz.id_zanra = z.id_zanra
+            WHERE LOWER(z.ime_zanra) = ANY(%s)
+            GROUP BY k.id_knjige, k.naslov, k.razpolozljivost
+            HAVING COUNT(DISTINCT z.ime_zanra) = %s
+        """
+        self.cur.execute(query, (zanri, len(zanri)))
         rows = self.cur.fetchall()
         return [Knjiga.from_dict(dict(row)) for row in rows]
+
     
     def dobi_knjige_po_avtorju(self, ime: Optional[str] = None, priimek: Optional[str] = None) -> List[Knjiga]:
         """
@@ -277,90 +256,69 @@ class Repo:
         return [Knjiga.from_dict(dict(row)) for row in self.cur.fetchall()]
 
     
-    #Izposoja 
-    def izposodi_knjigo(self, id_clana: int, id_knjige: int) -> None:
-        # Preveri ali je knjiga na voljo
-        self.cur.execute("""
-            SELECT razpolozljivost FROM knjiga WHERE id_knjige = %s
-        """, (id_knjige,))
-        row = self.cur.fetchone()
-        if not row:
-            raise ValueError("Knjiga s tem ID ne obstaja.")
-        if row['razpolozljivost'] != 'na voljo':
-            raise ValueError("Knjiga trenutno ni na voljo za izposojo.")
-
-        # Vstavi izposojo
-        self.cur.execute("""
-            INSERT INTO izposoja (id_clana, id_knjige)
-            VALUES (%s, %s)
-        """, (id_clana, id_knjige))
-
-        # Posodobi razpoložljivost knjige
-        self.cur.execute("""
-            UPDATE knjiga
-            SET razpolozljivost = 'ni na voljo'
-            WHERE id_knjige = %s
-        """, (id_knjige,))
-
-        self.conn.commit()
-
+    def dobi_knjigo_po_id(self, id_knjige: int):
+        self.cur.execute("SELECT * FROM knjiga WHERE id_knjige = %s", (id_knjige,))
+        return self.cur.fetchone()
     
-    # vračilo 
-    def vrni_knjigo(self, id_clana: int, id_knjige: int):
-        # Zabeleži vračilo v tabeli vracila
-        self.cur.execute("""
-            INSERT INTO vracila (id_clana, id_knjige)
-            VALUES (%s, %s)
-        """, (id_clana, id_knjige))
 
-        # Posodobi razpoložljivost knjige
-        self.cur.execute("""
-            UPDATE knjiga
-            SET razpolozljivost = 'na voljo'
-            WHERE id_knjige = %s
-        """, (id_knjige,))
+    def dobi_knjige_po_naslovu(self, naslov: str):
+        self.cur.execute(
+            "SELECT * FROM knjiga WHERE naslov = %s",
+            (naslov,)
+        )
+        return self.cur.fetchall()
 
+    #izposoja
+    def dodaj_izposojo(self, id_clana: int, id_knjige: int):
+        self.cur.execute(
+            "INSERT INTO izposoja (id_clana, id_knjige) VALUES (%s, %s)",
+            (id_clana, id_knjige)
+        )
+
+    def posodobi_razpolozljivost(self, id_knjige: int, razpolozljivost: str):
+        self.cur.execute(
+            "UPDATE knjiga SET razpolozljivost = %s WHERE id_knjige = %s",
+            (razpolozljivost, id_knjige)
+        )
         self.conn.commit()
+
+        
+    #vračilo 
+    def dodaj_vracilo(self, id_clana: int, id_knjige: int):
+        self.cur.execute(
+            "INSERT INTO vracila (id_clana, id_knjige) VALUES (%s, %s)",
+            (id_clana, id_knjige)
+        )
+
 
 
     #Bralno srecanje
-    def prijava_na_srecanje(self, id_clana: int, datum: str, naziv: str) -> None:
-        """
-        Prijavi člana na bralno srečanje glede na datum in naziv srečanja.
-        Če srečanje ne obstaja ali je član že prijavljen, sproži napako.
-        """
-        # Poišči srečanje po datumu in nazivu
-        self.cur.execute("""
-            SELECT id_srecanja
-            FROM bralno_srecanje
-            WHERE datum = %s AND LOWER(naziv_in_opis) = LOWER(%s)
-        """, (datum, naziv))
-        
-        srecanje = self.cur.fetchone()
-        if not srecanje:
-            raise ValueError("Srečanje s tem datumom in nazivom ne obstaja.")
-        
-        id_srecanja = srecanje['id_srecanja']
 
-        # Preveri, ali je član že prijavljen
-        self.cur.execute("""
-            SELECT 1
-            FROM udelezba
-            WHERE id_clana = %s AND id_srecanja = %s
-        """, (id_clana, id_srecanja))
-        
-        if self.cur.fetchone():
-            raise ValueError("Član je že prijavljen na to srečanje.")
+    # Poišči srečanje po datumu in nazivu
+    def get_srecanje(self, datum: str, naziv: str):
+        self.cur.execute(
+            "SELECT id_srecanja FROM bralno_srecanje WHERE datum = %s AND LOWER(naziv_in_opis) = LOWER(%s)",
+            (datum, naziv)
+        )
+        return self.cur.fetchone()
 
-        # Vstavi prijavo
-        self.cur.execute("""
-            INSERT INTO udelezba (id_clana, id_srecanja)
-            VALUES (%s, %s)
-        """, (id_clana, id_srecanja))
-        
+    # Preveri, ali je član že prijavljen
+    def preveri_udelezbo(self, id_clana: int, id_srecanja: int):
+        self.cur.execute(
+            "SELECT 1 FROM udelezba WHERE id_clana = %s AND id_srecanja = %s",
+            (id_clana, id_srecanja)
+        )
+        return self.cur.fetchone() is not None
+
+    # Vstavi prijavo člana
+    def dodaj_udelezbo(self, id_clana: int, id_srecanja: int):
+        self.cur.execute(
+            "INSERT INTO udelezba (id_clana, id_srecanja) VALUES (%s, %s)",
+            (id_clana, id_srecanja)
+        )
         self.conn.commit()
 
-
+    #prihodnja srečanja
     def prikazi_prihodnja_srecanja(self) -> List[BralnoSrecanje]:
         """
         Vrne seznam vseh bralnih srečanj, ki še niso potekla.
@@ -385,9 +343,10 @@ class Repo:
 
 
 
+
 #Za uvoz podatkov (admin)
-admin_repo = Repo(admin=True)
-admin_repo.uvozi_knjige_iz_json("Data/knjige.json")
+#admin_repo = Repo(admin=True)
+#admin_repo.uvozi_knjige_iz_json("Data/knjige.json")
 
 #Za normalno uporabo aplikacije (javnost)
 #repo = Repo(admin=False)
