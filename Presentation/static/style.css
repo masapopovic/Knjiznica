@@ -1,0 +1,175 @@
+/* ===================== Osnovni styling ===================== */
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #f4f6f8; 
+    color: #333;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* ===================== Naslovi in opis ===================== */
+h1.glavni-naslov {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: #1f3a5f; 
+}
+
+h2 {
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 15px;
+    color: #2c3e50;
+}
+
+.opis {
+    text-align: center;
+    font-size: 1rem;
+    margin-bottom: 20px;
+    color: #555;
+}
+
+/* ===================== Forme ===================== */
+form {
+    max-width: 500px;
+    margin: 20px auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+/* Gumbi */
+.btn {
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    display: inline-block;
+    border: none;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #2c3e50; 
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: #1f2d3d; 
+}
+
+.btn-secondary {
+    background-color: #7f8c8d; 
+    color: #fff;
+}
+
+.btn-secondary:hover {
+    background-color: #626e70;
+}
+
+/* ===================== Opozorila ===================== */
+.opozorilo {
+    color: #c0392b; 
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+/* ===================== Tabele ===================== */
+table.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+table.table th, table.table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+table.table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+table.table tr:hover {
+    background-color: #ececec;
+}
+
+table.table thead th {
+    background-color: #34495e; 
+    color: #fff;
+    font-weight: bold;
+}
+
+/* ===================== Seznami ===================== */
+ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+ul li {
+    padding: 8px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+ul li:last-child {
+    border-bottom: none;
+}
+
+/* ===================== Profil / kartice ===================== */
+.register-container, .home-container, .profil-container, .knjiga-container {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin: 20px auto;
+}
+
+/* komentarji in ocene */
+.komentar {
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #f7f8fa;
+    margin-bottom: 10px;
+}
+
+.komentar p {
+    margin: 0;
+}
+
+textarea.form-control {
+    resize: vertical;
+}
+
+hr {
+    margin: 30px 0;
+}
