@@ -14,18 +14,24 @@
             <input type="text" name="avtor" class="form-control">
         </div>
         <div class="form-group">
+            <label>Žanri (ločeni z vejico)</label>
+            <input type="text" name="zanri" class="form-control">
+        </div>
+        <div class="form-group">
             <label>Minimalna ocena</label>
-            <input type="number" name="min_ocena" class="form-control">
+            <input type="number" name="min_ocena" min="1" max="5" class="form-control">
         </div>
         <div class="gumbi">
             <button type="submit" class="btn btn-primary">Išči</button>
         </div>
     </form>
 
-    <h2>Prihodnja srečanja</h2>
-    <ul class="srecanja-list">
-        % for srecanje in prihodnja_srecanja:
-            <li>{{srecanje.naziv}} - {{srecanje.datum}}</li>
-        % end
-    </ul>
+    <div class="povezave">
+        <a href="/srecanja" class="btn btn-secondary">Bralna srečanja</a>
+        <a href="/profil" class="btn btn-secondary">Moj profil</a>
+    </div>
 </div>
+
+
+
+

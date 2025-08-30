@@ -319,6 +319,7 @@ class Repo:
         )
         return self.cur.fetchone() is not None
 
+
     # Vstavi prijavo člana
     def dodaj_udelezbo(self, id_clana: int, id_srecanja: int):
         self.cur.execute(
@@ -361,16 +362,14 @@ class Repo:
         rows = self.cur.fetchall()
         return [BralnoSrecanje.from_dict(dict(row)) for row in rows]
     
-    def najdi_nazive(self, fragment: str) -> list[str]:
-        self.cur.execute("""
-            SELECT DISTINCT naziv_in_opis
-            FROM bralno_srecanje
-            WHERE LOWER(naziv_in_opis) LIKE LOWER(%s)
-            ORDER BY naziv_in_opis ASC
-            LIMIT 10
-        """, (f"%{fragment}%",))
+    def stevilo_prijavljenih(self, id_srecanja: int) -> int:
+        self.cur.execute(
+            "SELECT COUNT(*) as cnt FROM udelezba WHERE id_srecanja=%s",
+            (id_srecanja,)
+        )
+        return self.cur.fetchone()["cnt"]
+    
 
-        return [row['naziv_in_opis'] for row in self.cur.fetchall()]
 
 
 

@@ -1,4 +1,4 @@
-from Presentation.bottleext import get, post, run, request, template, redirect, static_file, url, response, template_user, route
+from Presentation.bottleext import get, post, request, template, redirect, static_file,  response
 from Services.auth_service import AuthService
 from Services.knjige_service import KnjigaService
 from Services.ocene_service import OcenaService
@@ -22,6 +22,16 @@ RELOADER = os.environ.get('BOTTLE_RELOADER', True)
 def static(filename):
     return static_file(filename, root='Presentation/static')
 
+
+
+def cookie_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        user_id = request.get_cookie("id_clana", secret="skrivnost123")
+        if not user_id:
+            redirect("/prijava")  # če ni piškotka → na prijavno stran
+        return f(*args, **kwargs)
+    return wrapper
 
 # -------- Začetna stran --------
 @get("/")
@@ -77,20 +87,6 @@ def home():
         knjige=[],               # tukaj se bo naložil rezultat iskanja prek POST
         prihodnja_srecanja=srecanja_service.prikazi_prihodnja_srecanja()
     )
-# lahka pustima ta deu sam ta deu ti da rezulate teh knjig na pač isti strani pač home page-u js sm pa naredla zej nov tt post get whatewer
-# ko te pa da na novo stran na kiri so sam seznami knjig če šetkaš pa se ti osloč ka je bolš
-#@post("/iskanje_knjig")
-#@cookie_required
-#def iskanje_knjig():
-#    id_clana = int(request.get_cookie("id_clana", secret="skrivnost123"))
-#    naslov = request.forms.get("naslov")
-#    avtor = request.forms.get("avtor")
-#    zanri = request.forms.getall("zanri")  # več izbranih
-#    min_ocena = request.forms.get("min_ocena")
-
-#    rezultati = knjiga_service.iskanje_knjig(naslov, avtor, zanri, min_ocena)
-#    return template("home.html", clan=auth_service.repo.dobi_clana_po_id(id_clana),
-#                    knjige=rezultati, prihodnja_srecanja=srecanja_service.prikazi_prihodnja_srecanja())
 
 @get("/rezultati")
 @cookie_required
@@ -127,13 +123,16 @@ def prikazi_knjigo(id_knjige):
         avtorji[0]['priimek'] if avtorji else ''
     )
 
+    povprecna_ocena = ocena_service.povprecna_ocena_knjige(id_knjige)
+
     # Template odloči, ali pokaže gumb za izposojo
     return template(
         "knjiga.html",
         clan_id=id_clana,
         knjiga=knjiga,
         avtorji=avtorji,
-        ocene=ocene
+        ocene=ocene,
+        povprecna_ocena=povprecna_ocena
     )
 
 
@@ -166,16 +165,6 @@ def srecanja():
 
     return template("bralna_srecanja.html", srecanja=prihodnja, napaka=None)
 
-@get("/srecanja_autocomplete")
-def srecanja_autocomplete():
-    query = request.query.q  # niz, ki ga tipka uporabnik
-    if not query:
-        return {"results": []}
-
-    # Pokliči repo/service, da vrne samo nazive
-    matches = srecanja_service.najdi_nazive(query)
-    return {"results": matches}  # vrnemo JSON
-
 @post("/prijava_srecanja")
 @cookie_required
 def prijava_srecanja():
@@ -183,7 +172,7 @@ def prijava_srecanja():
     id_srecanja = int(request.forms.get("id_srecanja"))
 
     try:
-        srecanja_service.prijavi_clana_na_srecanje(id_clana, id_srecanja)
+        srecanja_service.prijava_na_srecanje(id_clana, id_srecanja)
         redirect("/srecanja")  # ostanemo na seznamu srečanj
     except ValueError as e:
         prihodnja = srecanja_service.prikazi_prihodnja_srecanja()
@@ -211,4 +200,8 @@ def profil():
         prijavljena_srecanja=prijavljena_srecanja
     )
 
+@post("/odjava")
+def odjava():
+    response.delete_cookie("id_clana", secret="skrivnost123")
+    redirect("/prijava")  # po odjavi ga vrže na prijavno stran
 

@@ -30,6 +30,8 @@ class SrecanjaService:
 
     def isci_prihodnja_srecanja(self, naziv: str = None, datum: str = None):
         return self.repo.isci_prihodnja_srecanja(naziv=naziv, datum=datum)
+    
+    def stevilo_prijavljenih(self, id_srecanja: int) -> int:
+        return self.repo.stevilo_prijavljenih(id_srecanja)
 
-    def najdi_nazive(self, fragment: str) -> list[str]:
-        return self.repo.najdi_nazive(fragment)
+

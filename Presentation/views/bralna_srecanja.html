@@ -1,40 +1,54 @@
-%rebase('osnova.html', naslov='Bralna srečanja', stran='srecanja')
+% rebase('osnova.html', naslov='Bralna srečanja', stran='srecanja')
 
 <div class="srecanja-container">
     <h1 class="glavni-naslov">Bralna srečanja</h1>
 
-    <form action="/srecanja" method="get" class="search-form">
+    <!-- Iskalnik -->
+    <form action="/srecanja" method="get" class="iskalnik">
         <div class="form-group">
-            <label>Naziv</label>
-            <input type="text" name="naziv" class="form-control">
+            <label for="naziv">Naziv srečanja:</label>
+            <input type="text" id="naziv" name="naziv" placeholder="Vnesi naziv" value="{{request.query.naziv or ''}}">
         </div>
         <div class="form-group">
-            <label>Datum</label>
-            <input type="date" name="datum" class="form-control">
+            <label for="datum">Datum:</label>
+            <input type="date" id="datum" name="datum" value="{{request.query.datum or ''}}">
         </div>
-        <div class="gumbi">
-            <button type="submit" class="btn btn-primary">Išči</button>
-        </div>
+        <button type="submit" class="btn btn-primary">Išči</button>
     </form>
 
     % if napaka:
         <p class="opozorilo">{{napaka}}</p>
     % end
 
-    <h2>Prihodnja srečanja</h2>
-    % if srecanja:
-        <ul class="srecanja-list">
-        % for s in srecanja:
-            <li>
-                {{s.naziv}} - {{s.datum}}
-                <form action="/prijava_srecanja" method="post" style="display:inline;">
-                    <input type="hidden" name="id_srecanja" value="{{s.id_srecanja}}">
-                    <button type="submit" class="btn btn-success">Prijavi se</button>
-                </form>
-            </li>
+    <!-- Seznam srečanj -->
+    <div class="seznam-srecanj">
+        % if srecanja:
+            % for s in srecanja:
+                <div class="srecanje">
+                    <h2>{{s.naziv_in_opis}}</h2>
+                    <p><strong>Datum:</strong> {{s.datum}}</p>
+                    <p><strong>Knjiga:</strong> {{s.naslov_knjige}}</p>
+                    <p><strong>Prostor:</strong> {{s.prostor}}</p>
+                    <p><strong>Prijavljenih:</strong> {{s.stevilo_prijavljenih}} / 30</p>
+
+                    <form action="/prijava_srecanja" method="post">
+                        <input type="hidden" name="id_srecanja" value="{{s.id_srecanja}}">
+                        % if s.stevilo_prijavljenih < 30 and not s.je_prijavljen:
+                            <button type="submit" class="btn btn-success">Prijava</button>
+                        % elif s.je_prijavljen:
+                            <button type="button" class="btn btn-secondary" disabled>Že prijavljen</button>
+                        % else:
+                            <button type="button" class="btn btn-danger" disabled>Polna zasedenost</button>
+                        % end
+                    </form>
+                </div>
+            % end
+        % else:
+            <p>Ni najdenih srečanj.</p>
         % end
-        </ul>
-    % else:
-        <p>Ni srečanj.</p>
-    % end
+    </div>
+
+    <div class="nazaj">
+        <a href="/home" class="btn btn-secondary">Nazaj na domačo stran</a>
+    </div>
 </div>

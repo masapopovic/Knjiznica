@@ -1,21 +1,22 @@
 %rebase('osnova.html', naslov='Rezultati iskanja', stran='rezultati')
 
-<div class="results-container">
-    <h1 class="glavni-naslov">Rezultati iskanja</h1>
+<h1 class="glavni-naslov">Rezultati iskanja</h1>
 
-    % if knjige:
-        <ul class="knjige-list">
-        % for knjiga in knjige:
-            <li>
-                <a href="/knjiga/{{knjiga.id_knjige}}" class="knjiga-link">{{knjiga.naslov}}</a>
-            </li>
+% if knjige:
+    % # Najprej knjige, ki so na voljo
+    % na_voljo = [k for k in knjige if k.razpolozljivost == 'na voljo']
+    % ni_na_voljo = [k for k in knjige if k.razpolozljivost != 'na voljo']
+
+    <div class="rezultati-grid">
+        % for knjiga in na_voljo + ni_na_voljo:
+            <div class="knjiga-kvadratek {{ 'na-voljo' if knjiga.razpolozljivost == 'na voljo' else 'ni-na-voljo' }}"
+                 onclick="window.location.href='/knjiga/{{knjiga.id_knjige}}'">
+                <h3>{{knjiga.naslov}}</h3>
+                <p>Avtor: {{knjiga.avtor_ime}} {{knjiga.avtor_priimek}}</p>
+                <p>Razpoložljivost: {{knjiga.razpoložljivost}}</p>
+            </div>
         % end
-        </ul>
-    % else:
-        <p>Ni najdenih knjig.</p>
-    % end
-
-    <div class="gumbi">
-        <a href="/home" class="btn btn-secondary">Nazaj na domačo stran</a>
     </div>
-</div>
+% else:
+    <p class="opis">Ni najdenih rezultatov za vaš iskalni poizvedek.</p>
+% end

@@ -1,37 +1,62 @@
 %rebase('osnova.html', naslov='Moj profil', stran='profil')
 
 <div class="profil-container">
-    <h1 class="glavni-naslov">{{clan.ime}} {{clan.priimek}}</h1>
-    <p>Email: {{clan.email}}</p>
+    <h1 class="glavni-naslov">Moj profil</h1>
 
-    <h2>Izposojene knjige</h2>
-    % if izposojene_knjige:
-        <ul class="knjige-list">
-        % for knjiga in izposojene_knjige:
-            <li>
-                {{knjiga.naslov}}
-                <form action="/vrni_knjigo/{{knjiga.id_clana}}" method="post" style="display:inline;">
-                    <button type="submit" class="btn btn-warning">Vrni knjigo</button>
-                </form>
-            </li>
+    <!-- Osnovni podatki o uporabniku -->
+    <div class="profil-podatki">
+        <h2>Osebni podatki</h2>
+        <p><strong>Ime:</strong> {{clan.ime}}</p>
+        <p><strong>Priimek:</strong> {{clan.priimek}}</p>
+        <p><strong>Uporabniško ime:</strong> {{clan.uporabnisko_ime}}</p>
+        <p><strong>Email:</strong> {{clan.email}}</p>
+    </div>
+
+    <!-- Izposojene knjige -->
+    <div class="profil-knjige">
+        <h2>Moje izposojene knjige</h2>
+        % if izposojene_knjige:
+            <ul class="seznam-knjig">
+                % for knjiga in izposojene_knjige:
+                    <li>
+                        <a href="/knjiga/{{knjiga.id_knjige}}">
+                            <strong>{{knjiga.naslov}}</strong> – {{knjiga.avtor}}
+                        </a>
+                        <span>(rok vračila: {{knjiga.rok_vracila}})</span>
+                    </li>
+                % end
+            </ul>
+        % else:
+            <p>Trenutno nimate izposojenih knjig.</p>
         % end
-        </ul>
-    % else:
-        <p>Ni izposojenih knjig.</p>
-    % end
+    </div>
 
-    <h2>Prijavljena srečanja</h2>
-    % if prijavljena_srecanja:
-        <ul class="srecanja-list">
-        % for s in prijavljena_srecanja:
-            <li>{{s.naziv}} - {{s.datum}}</li>
+    <!-- Bralna srečanja -->
+    <div class="profil-srecanja">
+        <h2>Moja bralna srečanja</h2>
+        % if prijavljena_srecanja:
+            <ul class="seznam-srecanj">
+                % for s in prijavljena_srecanja:
+                    <li>
+                        <strong>{{s.naziv_in_opis}}</strong> –
+                        {{s.datum}} (knjiga: {{s.naslov_knjige}})
+                    </li>
+                % end
+            </ul>
+        % else:
+            <p>Niste prijavljeni na nobeno srečanje.</p>
         % end
-        </ul>
-    % else:
-        <p>Nisi prijavljen na srečanja.</p>
-    % end
+    </div>
 
-    <div class="gumbi">
-        <a href="/home" class="btn btn-secondary">Nazaj na domačo stran</a>
+    <!-- Gumb za odjavo -->
+    <div class="profil-odjava">
+        <form action="/odjava" method="post">
+            <button type="submit" class="btn btn-secondary">Odjava</button>
+        </form>
+    </div>
+
+    <!-- Nazaj na domačo stran -->
+    <div class="nazaj-domov">
+        <a href="/home" class="btn btn-primary">Nazaj na domačo stran</a>
     </div>
 </div>
