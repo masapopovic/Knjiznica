@@ -1,0 +1,37 @@
+%rebase('osnova.html', naslov='Moj profil', stran='profil')
+
+<div class="profil-container">
+    <h1 class="glavni-naslov">{{clan.ime}} {{clan.priimek}}</h1>
+    <p>Email: {{clan.email}}</p>
+
+    <h2>Izposojene knjige</h2>
+    % if izposojene_knjige:
+        <ul class="knjige-list">
+        % for knjiga in izposojene_knjige:
+            <li>
+                {{knjiga.naslov}}
+                <form action="/vrni_knjigo/{{knjiga.id_clana}}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-warning">Vrni knjigo</button>
+                </form>
+            </li>
+        % end
+        </ul>
+    % else:
+        <p>Ni izposojenih knjig.</p>
+    % end
+
+    <h2>Prijavljena srečanja</h2>
+    % if prijavljena_srecanja:
+        <ul class="srecanja-list">
+        % for s in prijavljena_srecanja:
+            <li>{{s.naziv}} - {{s.datum}}</li>
+        % end
+        </ul>
+    % else:
+        <p>Nisi prijavljen na srečanja.</p>
+    % end
+
+    <div class="gumbi">
+        <a href="/home" class="btn btn-secondary">Nazaj na domačo stran</a>
+    </div>
+</div>

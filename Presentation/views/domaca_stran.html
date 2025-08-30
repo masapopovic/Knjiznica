@@ -1,0 +1,31 @@
+%rebase('osnova.html', naslov='Domača stran', stran='home')
+
+<div class="home-container">
+    <h1 class="glavni-naslov">Pozdravljen, {{clan.ime}} {{clan.priimek}}!</h1>
+
+    <h2>Išči knjige</h2>
+    <form action="/rezultati" method="get" class="search-form">
+        <div class="form-group">
+            <label>Naslov</label>
+            <input type="text" name="naslov" class="form-control">
+        </div>
+        <div class="form-group">
+            <label>Avtor</label>
+            <input type="text" name="avtor" class="form-control">
+        </div>
+        <div class="form-group">
+            <label>Minimalna ocena</label>
+            <input type="number" name="min_ocena" class="form-control">
+        </div>
+        <div class="gumbi">
+            <button type="submit" class="btn btn-primary">Išči</button>
+        </div>
+    </form>
+
+    <h2>Prihodnja srečanja</h2>
+    <ul class="srecanja-list">
+        % for srecanje in prihodnja_srecanja:
+            <li>{{srecanje.naziv}} - {{srecanje.datum}}</li>
+        % end
+    </ul>
+</div>

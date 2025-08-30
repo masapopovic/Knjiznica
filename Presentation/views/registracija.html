@@ -1,0 +1,42 @@
+%rebase('osnova.html', naslov='Registracija', stran='registracija')
+
+<div class="register-container">
+    <h1 class="glavni-naslov">Registracija</h1>
+    <p class="opis">Ustvarite svoj račun in si začnite izposojati knjige.</p>
+
+    % if napaka:
+        <p class="opozorilo">{{napaka}}</p>
+    % end
+
+    <form action="/registracija" method="post" class="register-form">
+        <div class="form-group">
+            <label>Ime</label>
+            <input type="text" name="ime" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label>Priimek</label>
+            <input type="text" name="priimek" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label>Uporabniško ime</label>
+            <input type="text" name="uporabnisko_ime" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label>Geslo</label>
+            <input type="password" name="geslo" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" name="email" class="form-control" required>
+        </div>
+
+        <div class="gumbi">
+            <button type="submit" class="btn btn-primary">Registriraj se</button>
+        </div>
+    </form>
+
+    <div class="nov-uporabnik">
+        <p class="opis">Že imaš račun?</p>
+        <a href="/prijava" class="btn btn-secondary">Prijavi se</a>
+    </div>
+</div>

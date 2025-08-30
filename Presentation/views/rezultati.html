@@ -1,0 +1,21 @@
+%rebase('osnova.html', naslov='Rezultati iskanja', stran='rezultati')
+
+<div class="results-container">
+    <h1 class="glavni-naslov">Rezultati iskanja</h1>
+
+    % if knjige:
+        <ul class="knjige-list">
+        % for knjiga in knjige:
+            <li>
+                <a href="/knjiga/{{knjiga.id_knjige}}" class="knjiga-link">{{knjiga.naslov}}</a>
+            </li>
+        % end
+        </ul>
+    % else:
+        <p>Ni najdenih knjig.</p>
+    % end
+
+    <div class="gumbi">
+        <a href="/home" class="btn btn-secondary">Nazaj na domačo stran</a>
+    </div>
+</div>

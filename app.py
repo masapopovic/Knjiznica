@@ -29,7 +29,7 @@ def zacetna_stran():
     user_id = request.get_cookie("id_clana", secret="skrivnost123")
     if user_id:
         redirect("/home")
-    return template("zacetna.html")
+    return template("zacetna_stran.html")
 
 # -------- Prijava / registracija --------
 @get("/prijava")
@@ -72,24 +72,38 @@ def home():
     id_clana = int(request.get_cookie("id_clana", secret="skrivnost123"))
     clan = auth_service.repo.dobi_clana_po_id(id_clana)  # ali po id_clana
     return template(
-        "home.html",
+        "domaca_stran.html",
         clan=clan,
         knjige=[],               # tukaj se bo naložil rezultat iskanja prek POST
         prihodnja_srecanja=srecanja_service.prikazi_prihodnja_srecanja()
     )
+# lahka pustima ta deu sam ta deu ti da rezulate teh knjig na pač isti strani pač home page-u js sm pa naredla zej nov tt post get whatewer
+# ko te pa da na novo stran na kiri so sam seznami knjig če šetkaš pa se ti osloč ka je bolš
+#@post("/iskanje_knjig")
+#@cookie_required
+#def iskanje_knjig():
+#    id_clana = int(request.get_cookie("id_clana", secret="skrivnost123"))
+#    naslov = request.forms.get("naslov")
+#    avtor = request.forms.get("avtor")
+#    zanri = request.forms.getall("zanri")  # več izbranih
+#    min_ocena = request.forms.get("min_ocena")
 
-@post("/iskanje_knjig")
+#    rezultati = knjiga_service.iskanje_knjig(naslov, avtor, zanri, min_ocena)
+#    return template("home.html", clan=auth_service.repo.dobi_clana_po_id(id_clana),
+#                    knjige=rezultati, prihodnja_srecanja=srecanja_service.prikazi_prihodnja_srecanja())
+
+@get("/rezultati")
 @cookie_required
-def iskanje_knjig():
+def rezultati():
     id_clana = int(request.get_cookie("id_clana", secret="skrivnost123"))
-    naslov = request.forms.get("naslov")
-    avtor = request.forms.get("avtor")
-    zanri = request.forms.getall("zanri")  # več izbranih
-    min_ocena = request.forms.get("min_ocena")
+    naslov = request.query.get("naslov")
+    avtor = request.query.get("avtor")
+    min_ocena = request.query.get("min_ocena")
 
-    rezultati = knjiga_service.iskanje_knjig(naslov, avtor, zanri, min_ocena)
-    return template("home.html", clan=auth_service.repo.dobi_clana_po_id(id_clana),
-                    knjige=rezultati, prihodnja_srecanja=srecanja_service.prikazi_prihodnja_srecanja())
+    knjige = knjiga_service.iskanje_knjig(naslov, avtor, [], min_ocena)
+
+    return template("rezultati.html", clan=auth_service.repo.dobi_clana_po_id(id_clana), knjige=knjige)
+
 
 # -------- Stran posamezne knjige --------
 @get("/knjiga/<id_knjige:int>")
@@ -150,7 +164,7 @@ def srecanja():
     # Pokliči service funkcijo, ki vrne filtrirana srečanja
     prihodnja = srecanja_service.isci_prihodnja_srecanja(naziv=naziv, datum=datum)
 
-    return template("srecanja.html", srecanja=prihodnja, napaka=None)
+    return template("bralna_srecanja.html", srecanja=prihodnja, napaka=None)
 
 @get("/srecanja_autocomplete")
 def srecanja_autocomplete():
@@ -173,7 +187,7 @@ def prijava_srecanja():
         redirect("/srecanja")  # ostanemo na seznamu srečanj
     except ValueError as e:
         prihodnja = srecanja_service.prikazi_prihodnja_srecanja()
-        return template("srecanja.html", srecanja=prihodnja, napaka=str(e))
+        return template("bralna_srecanja.html", srecanja=prihodnja, napaka=str(e))
 
 
 @get("/profil")

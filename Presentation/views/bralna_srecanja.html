@@ -1,0 +1,40 @@
+%rebase('osnova.html', naslov='Bralna srečanja', stran='srecanja')
+
+<div class="srecanja-container">
+    <h1 class="glavni-naslov">Bralna srečanja</h1>
+
+    <form action="/srecanja" method="get" class="search-form">
+        <div class="form-group">
+            <label>Naziv</label>
+            <input type="text" name="naziv" class="form-control">
+        </div>
+        <div class="form-group">
+            <label>Datum</label>
+            <input type="date" name="datum" class="form-control">
+        </div>
+        <div class="gumbi">
+            <button type="submit" class="btn btn-primary">Išči</button>
+        </div>
+    </form>
+
+    % if napaka:
+        <p class="opozorilo">{{napaka}}</p>
+    % end
+
+    <h2>Prihodnja srečanja</h2>
+    % if srecanja:
+        <ul class="srecanja-list">
+        % for s in srecanja:
+            <li>
+                {{s.naziv}} - {{s.datum}}
+                <form action="/prijava_srecanja" method="post" style="display:inline;">
+                    <input type="hidden" name="id_srecanja" value="{{s.id_srecanja}}">
+                    <button type="submit" class="btn btn-success">Prijavi se</button>
+                </form>
+            </li>
+        % end
+        </ul>
+    % else:
+        <p>Ni srečanj.</p>
+    % end
+</div>

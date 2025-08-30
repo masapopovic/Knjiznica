@@ -1,0 +1,55 @@
+%rebase('osnova.html', naslov=knjiga.naslov, stran='knjiga')
+
+<div class="knjiga-container">
+    <h1 class="glavni-naslov">{{knjiga.naslov}}</h1>
+
+    <p><strong>Avtorji:</strong>
+    % for a in avtorji:
+        {{a['ime']}} {{a['priimek']}}% if not loop.last:, % end
+    % end
+    </p>
+
+    % if knjiga.opis:
+        <p><strong>Opis:</strong> {{knjiga.opis}}</p>
+    % end
+
+    % if ocene:
+        <p><strong>Povprečna ocena:</strong> {{'%.2f' % (sum([o['ocena'] for o in ocene]) / len(ocene))}} ★</p>
+    % else:
+        <p>Ni ocen še.</p>
+    % end
+
+    <h3>Ocene uporabnikov:</h3>
+    % for o in ocene:
+        <div class="ocena">
+            <strong>{{o['ocena']}} ★</strong> – {{o['komentar']}}
+        </div>
+    % end
+
+    <hr>
+
+    <h3>Dodaj svojo oceno:</h3>
+    <form action="/dodaj_oceno/{{knjiga.id_knjige}}" method="post" class="ocena-form">
+        <div class="form-group">
+            <label>Ocena (1-5)</label>
+            <input type="number" name="ocena" min="1" max="5" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label>Komentar</label>
+            <textarea name="komentar" class="form-control"></textarea>
+        </div>
+        <div class="gumbi">
+            <button type="submit" class="btn btn-primary">Dodaj oceno</button>
+        </div>
+    </form>
+
+    <hr>
+
+    <form action="/izposodi/{{knjiga.id_knjige}}" method="post">
+        <button type="submit" class="btn btn-success">Izposodi knjigo</button>
+    </form>
+
+    <div class="gumbi">
+        <a href="/home" class="btn btn-secondary">Nazaj na domačo stran</a>
+    </div>
+</div>

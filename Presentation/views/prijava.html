@@ -1,0 +1,31 @@
+%rebase('osnova.html', naslov='Prijava', stran='prijava')
+
+<div class="login-container">
+    <h1 class="glavni-naslov">Prijava</h1>
+    <p class="opis">Vnesite svoje podatke za prijavo.</p>
+
+    % if napaka:
+        <p class="opozorilo">{{napaka}}</p>
+    % end
+
+    <form action="/prijava" method="post" class="login-form">
+        <div class="form-group">
+            <label for="username">Uporabniško ime</label>
+            <input type="text" id="username" name="uporabnisko_ime" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Geslo</label>
+            <input type="password" id="password" name="geslo" class="form-control" required>
+        </div>
+
+        <div class="gumbi">
+            <button type="submit" class="btn btn-primary">Prijavi se</button>
+        </div>
+    </form>
+
+    <div class="nov-uporabnik">
+        <p class="opis">Še nimaš računa?</p>
+        <a href="/registracija" class="btn btn-secondary">Ustvari nov račun</a>
+    </div>
+</div>
