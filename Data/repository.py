@@ -5,10 +5,10 @@ import os
 from typing import List, Optional
 
 
-import auth_public as auth_javnost  # uporabnik javnost
-import auth as auth  # uporabnik jaz
+from . import auth_public as auth_javnost # uporabnik javnost
+from . import auth as auth  # uporabnik jaz
 
-from models import Clan, ClanDto, Knjiga, Avtor, BralnoSrecanje, Ocena, Izposoja, Rezervacija, KnjigaInAvtor, Udelezba
+from Data.models import Clan, ClanDto, Knjiga, Avtor, BralnoSrecanje, Ocena, Izposoja, Rezervacija, KnjigaInAvtor, Udelezba, Zanr
 
 DB_PORT = os.environ.get('POSTGRES_PORT', 5432)
 
@@ -144,7 +144,37 @@ class Repo:
                              o.ocena, o.datum, o.komentar, o.id_clana, o.id_knjige
                              ))
         self.conn.commit()
-        
+    
+    def dodaj_oceno_vsem_izvodom_po_id(self, ocena_obj: Ocena):
+        """
+        Doda oceno vsem izvodom knjige, ki imajo enak naslov in iste avtorje kot knjiga z id_knjige.
+        """
+        self.cur.execute("""
+            INSERT INTO ocena (id_clana, id_knjige, ocena, komentar, datum)
+            SELECT %s, k.id_knjige, %s, %s, CURRENT_DATE
+            FROM knjiga k
+            WHERE k.naslov = (SELECT naslov FROM knjiga WHERE id_knjige = %s)
+            AND k.id_knjige IN (
+                SELECT ka.id_knjige
+                FROM knjiga_in_avtor ka
+                WHERE ka.id_knjige = k.id_knjige
+                GROUP BY ka.id_knjige
+                HAVING ARRAY_AGG(ka.id_avtorja ORDER BY ka.id_avtorja) =
+                    (SELECT ARRAY_AGG(id_avtorja ORDER BY id_avtorja) 
+                        FROM knjiga_in_avtor 
+                        WHERE id_knjige = %s)
+            )
+        """, (
+            ocena_obj.id_clana,
+            ocena_obj.ocena,
+            ocena_obj.komentar,
+            ocena_obj.id_knjige,
+            ocena_obj.id_knjige
+        ))
+        self.conn.commit()
+
+
+
         
     def povprecna_ocena_knjige(self, id_knjige: int) -> Optional[float]:
         self.cur.execute("""
@@ -155,56 +185,33 @@ class Repo:
         row = self.cur.fetchone()
         return float(row['povprecje']) if row and row['povprecje'] is not None else None
 
-    
-    def dobi_ocene_po_naslovu_in_avtorju(
-        self, 
-        naslov_knjige: Optional[str] = None, 
-        ime_avtorja: Optional[str] = None, 
-        priimek_avtorja: Optional[str] = None
-    ) -> List[Ocena]:
+    def ocene_po_id_knjige(self, id_knjige: int) -> list[Ocena]:
         """
-        Vrne seznam ocen glede na naslov knjige in/ali ime in priimek avtorja.
-        Če je katerikoli argument None, se ignorira pri iskanju.
+        Vrne seznam vseh ocen za določen izvod knjige.
         """
-        query = """
-        SELECT 
-            o.id_ocene,
-            o.ocena,
-            o.datum,
-            o.komentar,
-            o.id_clana,
-            o.id_knjige
-        FROM ocena o
-        JOIN knjiga k ON o.id_knjige = k.id_knjige
-        JOIN knjiga_in_avtor ka ON k.id_knjige = ka.id_knjige
-        JOIN avtor a ON ka.id_avtorja = a.id_avtorja
-        WHERE 1=1
-        """
-        params = []
+        self.cur.execute("""
+            SELECT id_ocene, ocena, datum, komentar, id_clana, id_knjige
+            FROM ocena
+            WHERE id_knjige = %s
+            ORDER BY id_ocene DESC
+        """, (id_knjige,))
         
-        if naslov_knjige:
-            query += " AND LOWER(k.naslov) = LOWER(%s)"
-            params.append(naslov_knjige)
-        if ime_avtorja:
-            query += " AND LOWER(a.ime) LIKE LOWER(%s)"
-            params.append(f"%{ime_avtorja}%")
-        if priimek_avtorja:
-            query += " AND LOWER(a.priimek) LIKE LOWER(%s)"
-            params.append(f"%{priimek_avtorja}%")
-        
-        query += " ORDER BY o.id_ocene ASC"
-        
-        self.cur.execute(query, params)
-        return [Ocena.from_dict(dict(row)) for row in self.cur.fetchall()]
+        rows = self.cur.fetchall()
+        return [Ocena.from_dict(dict(row)) for row in rows]
 
-            
 
 
     #knjige po žanrih, avtorjih, naslovih ter povp. oceni
-    def poisci_knjige(self, naslov: str = None, avtor: str = None, zanri: list[str] = None, min_ocena: int = None) -> list[Knjiga]:
+    def poisci_knjige(
+            self,
+            naslov: str = None,
+            avtorji: list[str] = None,
+            zanri: list[str] = None,
+            min_ocena: int = None
+        ) -> list[Knjiga]:
         """
-        Išče knjige glede na naslov, avtorja, žanre in minimalno povprečno oceno.
-        Vrača vse ustrezne knjige.
+        Išče knjige glede na naslov, seznam avtorjev, seznam žanrov in minimalno povprečno oceno.
+        Če so podani avtorji ali žanri, vrne samo knjige, ki vsebujejo vse te avtorje in/ali vse te žanre.
         """
         query = """
             SELECT DISTINCT k.id_knjige, k.naslov, k.razpolozljivost
@@ -221,26 +228,61 @@ class Repo:
         if naslov:
             query += " AND LOWER(k.naslov) LIKE LOWER(%s)"
             params.append(f"%{naslov}%")
-        if avtor:
-            query += " AND (LOWER(a.ime) LIKE LOWER(%s) OR LOWER(a.priimek) LIKE LOWER(%s))"
-            params.extend([f"%{avtor}%", f"%{avtor}%"])
+
+        # Avtorji kot seznam
+        if avtorji:
+            avtorji_lower = [a.strip().lower() for a in avtorji]
+            query += """
+                AND k.id_knjige IN (
+                    SELECT ka.id_knjige
+                    FROM knjiga_in_avtor ka
+                    JOIN avtor a ON ka.id_avtorja = a.id_avtorja
+                    WHERE LOWER(a.ime || ' ' || a.priimek) = ANY(%s)
+                    GROUP BY ka.id_knjige
+                    HAVING COUNT(DISTINCT a.id_avtorja) = %s
+                )
+            """
+            params.append(avtorji_lower)
+            params.append(len(avtorji_lower))
+
+        # Žanri kot seznam
         if zanri:
-            query += " AND LOWER(z.ime_zanra) = ANY(%s)"
-            params.append(zanri)
+            zanri_lower = [z.lower() for z in zanri]
+            query += """
+                AND k.id_knjige IN (
+                    SELECT kz.id_knjige
+                    FROM knjiga_in_zanr kz
+                    JOIN zanr z ON kz.id_zanra = z.id_zanra
+                    WHERE LOWER(z.ime_zanra) = ANY(%s)
+                    GROUP BY kz.id_knjige
+                    HAVING COUNT(DISTINCT z.id_zanra) = %s
+                )
+            """
+            params.append(zanri_lower)
+            params.append(len(zanri_lower))
+
         if min_ocena:
             query += " GROUP BY k.id_knjige HAVING AVG(o.ocena) >= %s"
             params.append(min_ocena)
-        
+
         query += " ORDER BY k.razpolozljivost DESC"
 
         self.cur.execute(query, params)
         rows = self.cur.fetchall()
         return [Knjiga.from_dict(dict(row)) for row in rows]
 
-    
-    def dobi_knjigo_po_id(self, id_knjige: int):
-        self.cur.execute("SELECT * FROM knjiga WHERE id_knjige = %s", (id_knjige,))
-        return self.cur.fetchone()
+        
+    def dobi_knjigo_po_id(self, id_knjige: int) -> Knjiga | None:
+        self.cur.execute("""
+            SELECT id_knjige, naslov, razpolozljivost
+            FROM knjiga
+            WHERE id_knjige = %s
+        """, (id_knjige,))
+        row = self.cur.fetchone()
+        if row:
+            return Knjiga.from_dict(dict(row))
+        return None
+
     
     def dobi_avtorje_knjige(self, id_knjige: int):
         self.cur.execute("""
@@ -249,8 +291,21 @@ class Repo:
             JOIN knjiga_in_avtor ka ON a.id_avtorja = ka.id_avtorja
             WHERE ka.id_knjige = %s
         """, (id_knjige,))
-        return self.cur.fetchall()  # vrne seznam dict: [{'ime':..., 'priimek':...}, ...]
+        rows = self.cur.fetchall() 
+        return [Avtor.from_dict(dict(row)) for row in rows]
+    
+    
+    def dobi_zanre_knjige(self, id_knjige: int) -> list[Zanr]:
+        self.cur.execute("""
+            SELECT z.id_zanra, z.ime_zanra
+            FROM zanr z
+            JOIN knjiga_in_zanr kz ON z.id_zanra = kz.id_zanra
+            WHERE kz.id_knjige = %s
+        """, (id_knjige,))
+        rows = self.cur.fetchall()
+        return [Zanr.from_dict(dict(row)) for row in rows]
 
+ 
 
     #izposoja
     def dodaj_izposojo(self, id_clana: int, id_knjige: int):
@@ -258,6 +313,7 @@ class Repo:
             "INSERT INTO izposoja (id_clana, id_knjige) VALUES (%s, %s)",
             (id_clana, id_knjige)
         )
+    
 
     def posodobi_razpolozljivost(self, id_knjige: int, razpolozljivost: str):
         self.cur.execute(
@@ -268,15 +324,24 @@ class Repo:
 
     # Izposojene knjige
     def dobi_izposojene_knjige(self, id_clana: int) -> list[Knjiga]:
+        """
+        Vrne seznam knjig, ki jih je član trenutno izposodil
+        (tj. kjer še ni potekel rok vračila).
+        """
         self.cur.execute("""
             SELECT k.id_knjige, k.naslov, k.razpolozljivost, i.rok_vracila
             FROM izposoja i
             JOIN knjiga k ON i.id_knjige = k.id_knjige
-            WHERE i.id_clana = %s AND i.vraceno = FALSE
+            WHERE i.id_clana = %s
+            AND i.rok_vracila >= CURRENT_DATE
         """, (id_clana,))
         rows = self.cur.fetchall()
-        return [Knjiga.from_dict(dict(row)) for row in rows]
-        
+        knjige = [Knjiga.from_dict(dict(row)) for row in rows]
+        for i, row in enumerate(rows):
+            knjige[i].rok_vracila = row['rok_vracila']
+        return knjige
+
+
     #vračilo 
     def dodaj_vracilo(self, id_clana: int, id_knjige: int):
         self.cur.execute(
@@ -287,6 +352,23 @@ class Repo:
 
 
     #Bralno srecanje
+
+    def get_srecanje_po_id(self, id_srecanja: int):
+        """
+        Vrne podatke o bralnem srečanju glede na id_srecanja.
+        """
+        self.cur.execute("""
+            SELECT 
+                id_srecanja,
+                prostor,
+                datum,
+                naziv_in_opis,
+                id_knjige
+            FROM bralno_srecanje
+            WHERE id_srecanja = %s
+        """, (id_srecanja,))
+        row = self.cur.fetchone()
+        return dict(row) if row else None
 
     # Poišči srečanje po datumu in nazivu
     def isci_prihodnja_srecanja(self, naziv: str = None, datum: str = None) -> list[BralnoSrecanje]:
@@ -368,6 +450,8 @@ class Repo:
             (id_srecanja,)
         )
         return self.cur.fetchone()["cnt"]
+
+
     
 
 

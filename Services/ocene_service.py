@@ -17,16 +17,12 @@ class OcenaService:
         return self.repo.povprecna_ocena_knjige(id_knjige)
     
 
-    def ocene_po_naslovu_in_avtorju(
-        self, 
-        naslov_knjige: Optional[str] = None, 
-        ime_avtorja: Optional[str] = None, 
-        priimek_avtorja: Optional[str] = None
-    ) -> List[Ocena]:
+    def ocene_po_id_knjige(self, id_knjige: int) -> list[Ocena]:
         """
-        Vrne seznam ocen glede na naslov knjige in/ali avtorja.
+        Vrne seznam vseh ocen za določeno knjigo (po ID),
+        z najnovejšimi ocenami na vrhu.
         """
-        return self.repo.dobi_ocene_po_naslovu_in_avtorju(naslov_knjige, ime_avtorja, priimek_avtorja)
+        return self.repo.ocene_po_id_knjige(id_knjige)
 
     
 
@@ -40,9 +36,15 @@ class OcenaService:
         # Dobi podatke knjige po ID
         knjiga = self.repo.dobi_knjigo_po_id(id_knjige)
 
-        # Poišči vse izvole iste knjige (isti naslov + avtor)
-        vse_izvode = self.repo.poisci_knjige(naslov=knjiga.naslov, avtor=knjiga.avtor_priimek)
-        
+        # Dobi avtorje te knjige
+        avtorji = self.repo.dobi_avtorje_knjige(id_knjige)
+
+        # Oblikuj niz za iskanje: vsi avtorji ločeni z vejico
+        avtorji_iskani = ", ".join([f"{a.ime} {a.priimek}" for a in avtorji])
+
+        # Poišči vse izvode iste knjige (isti naslov in isti avtorji)
+        vse_izvode = self.repo.poisci_knjige(naslov=knjiga.naslov, avtorji=avtorji_iskani)
+
         for k in vse_izvode:
             nova_ocena = Ocena(
                 ocena=ocena,
@@ -52,3 +54,19 @@ class OcenaService:
                 id_knjige=k.id_knjige
             )
             self.repo.dodaj_oceno(nova_ocena)
+    
+    def dodaj_oceno_vsem_izvodom(self, id_clana: int, id_knjige: int, ocena: int, komentar: str = ""):
+        """
+        Doda oceno vsem izvodom knjige, ki imajo enak naslov in iste avtorje kot knjiga z id_knjige.
+        """
+        ocena_obj = Ocena(
+            id_clana=id_clana,
+            id_knjige=id_knjige,
+            ocena=ocena,
+            komentar=komentar
+        )
+
+        self.repo.dodaj_oceno_vsem_izvodom_po_id(ocena_obj)
+
+
+

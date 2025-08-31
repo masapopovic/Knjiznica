@@ -13,17 +13,21 @@ class SrecanjaService:
     def prikazi_prihodnja_srecanja(self):
         return self.repo.prikazi_prihodnja_srecanja()
 
-    def prijava_na_srecanje(self, id_clana: int, datum: str, naziv: str):
-        srecanje = self.repo.get_srecanje(datum, naziv)
-        if not srecanje:
-            raise ValueError("Srečanje s tem datumom in nazivom ne obstaja.")
+    def prijava_na_srecanje(self, id_clana: int, id_srecanja: int):
+        # Dobimo srečanje po ID-ju
+        srecanje = self.repo.get_srecanje_po_id(id_srecanja)
 
-        id_srecanja = srecanje['id_srecanja']
+        if not srecanje:
+            raise ValueError("Srečanje s tem ID-jem ne obstaja.")
 
         if self.repo.preveri_udelezbo(id_clana, id_srecanja):
             raise ValueError("Član je že prijavljen na to srečanje.")
 
         self.repo.dodaj_udelezbo(id_clana, id_srecanja)
+
+
+    def je_clan_prijavljen(self, id_clana: int, id_srecanja: int) -> bool:
+        return self.repo.preveri_udelezbo(id_clana, id_srecanja)
 
     def prihodnja_srecanja_po_clanu(self, id_clana: int):
         return self.repo.prihodnja_srecanja_po_clanu(id_clana)

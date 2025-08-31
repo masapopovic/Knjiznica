@@ -7,11 +7,11 @@
     <form action="/srecanja" method="get" class="iskalnik">
         <div class="form-group">
             <label for="naziv">Naziv srečanja:</label>
-            <input type="text" id="naziv" name="naziv" placeholder="Vnesi naziv" value="{{request.query.naziv or ''}}">
+            <input type="text" id="naziv" name="naziv" placeholder="Vnesi naziv" value="{{naziv}}">
         </div>
         <div class="form-group">
             <label for="datum">Datum:</label>
-            <input type="date" id="datum" name="datum" value="{{request.query.datum or ''}}">
+            <input type="date" id="datum" name="datum" value="{{datum}}">
         </div>
         <button type="submit" class="btn btn-primary">Išči</button>
     </form>

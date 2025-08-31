@@ -14,22 +14,57 @@ class KnjigaService:
 
     def prikazi_vse_knjige(self):
         return self.repo.poisci_knjige()
+    
+    def dobi_zanre_knjige(self, id_knjige: int) -> list[str]:
+        return self.repo.dobi_zanre_knjige(id_knjige)
 
-    def iskanje_knjig(self, naslov=None, avtor=None, zanri=None, min_ocena=None):
-        return self.repo.poisci_knjige(naslov, avtor, zanri, min_ocena)
+    def iskanje_knjig(
+        self,
+        naslov: str = None,
+        avtorji: list[str] = None,
+        zanri: list[str] = None,
+        min_ocena: int = None
+    ) -> list[Knjiga]:
+        """
+        Vrne seznam knjig, vsak objekt vsebuje seznam avtorjev in žanrov.
+        """
+        knjige = self.repo.poisci_knjige(
+            naslov=naslov,
+            avtorji=avtorji,
+            zanri=zanri,
+            min_ocena=min_ocena
+        )
+
+        for k in knjige:
+            k.avtorji = self.repo.dobi_avtorje_knjige(k.id_knjige)  # seznam objektov Avtor
+            k.zanri = self.repo.dobi_zanre_knjige(k.id_knjige)      # seznam objektov Zanr
+
+        return knjige
+
 
     def dobi_izposojene_knjige(self, id_clana: int):
         return self.repo.dobi_izposojene_knjige(id_clana)
     
-    def izposodi_knjigo(self, id_clana: int, id_knjige: int):
-        knjiga = self.repo.dobi_knjigo_po_id(id_knjige)
-        if not knjiga:
-            raise ValueError("Knjiga s tem ID ne obstaja.")
-        if knjiga['razpolozljivost'] != 'na voljo':
-            raise ValueError("Knjiga trenutno ni na voljo za izposojo.")
 
+    
+    def izposodi_knjigo(self, id_clana: int, id_knjige: int):
+        # Najprej preveri status člana
+        clan = self.repo.dobi_clana_po_id(id_clana)
+        if not clan:
+            raise ValueError("Član s tem ID ne obstaja.")
+        
+        if clan.status_clana != "aktiven":
+            raise ValueError("Izposoja ni mogoča, ker član ni aktiven.")
+        
+        # Preveri, če je knjiga na voljo
+        knjiga = self.repo.dobi_knjigo_po_id(id_knjige)
+        if not knjiga or knjiga.razpolozljivost != "na voljo":
+            raise ValueError("Knjiga trenutno ni na voljo za izposojo.")
+        
+        # Če so pogoji izpolnjeni, dodaj izposojo
         self.repo.dodaj_izposojo(id_clana, id_knjige)
         self.repo.posodobi_razpolozljivost(id_knjige, 'ni na voljo')
+
 
     def vrni_knjigo_po_id(self, id_clana: int, id_knjige: int):
         knjiga = self.repo.dobi_knjigo_po_id(id_knjige)

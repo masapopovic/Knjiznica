@@ -12,8 +12,16 @@
             <div class="knjiga-kvadratek {{ 'na-voljo' if knjiga.razpolozljivost == 'na voljo' else 'ni-na-voljo' }}"
                  onclick="window.location.href='/knjiga/{{knjiga.id_knjige}}'">
                 <h3>{{knjiga.naslov}}</h3>
-                <p>Avtor: {{knjiga.avtor_ime}} {{knjiga.avtor_priimek}}</p>
-                <p>Razpoložljivost: {{knjiga.razpoložljivost}}</p>
+
+                % if hasattr(knjiga, "avtorji") and knjiga.avtorji:
+                    <p>Avtorji: {{", ".join([a.ime + " " + a.priimek for a in knjiga.avtorji])}}</p>
+                % end
+
+                % if hasattr(knjiga, "zanri") and knjiga.zanri:
+                    <p>Žanri: {{", ".join([z.ime_zanra for z in knjiga.zanri])}}</p>
+                % end
+
+                <p>Razpoložljivost: {{knjiga.razpolozljivost}}</p>
             </div>
         % end
     </div>
