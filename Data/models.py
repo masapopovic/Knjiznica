@@ -78,14 +78,8 @@ class Izposoja:
     id_knjige: int = field(default=0)
     datum_izposoje: str = field(default="")  
     rok_vracila: Optional[str] = None  
+    status_izposoje:  str = field(default="izposojeno")
 
-
-@dataclass_json
-@dataclass
-class Rezervacija:
-    id_clana: int = field(default=0)
-    id_knjige: int = field(default=0)
-    datum_rezervacije: str = field(default="")  
 
 
 @dataclass_json

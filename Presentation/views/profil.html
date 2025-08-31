@@ -12,16 +12,20 @@
 
     <h2>Trenutno izposojene knjige</h2>
     % if izposojene_knjige:
-        <ul class="izposojene-knjige">
-            % for knjiga in izposojene_knjige:
-                <li>
-                    <strong>{{knjiga.naslov}}</strong> – Rok vračila: {{knjiga.rok_vracila}}
-                </li>
-            % end
+        <ul>
+        % for knjiga in izposojene_knjige:
+            <li>
+                <strong>{{knjiga.naslov}}</strong> – Rok vračila: {{knjiga.rok_vracila}}
+                <form action="/vrni/{{knjiga.id_knjige}}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-danger">Vrni knjigo</button>
+                </form>
+            </li>
+        % end
         </ul>
     % else:
         <p>Trenutno nimate izposojenih knjig.</p>
     % end
+
 
     <hr>
 

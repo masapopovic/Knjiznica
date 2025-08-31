@@ -8,7 +8,7 @@ from typing import List, Optional
 from . import auth_public as auth_javnost # uporabnik javnost
 from . import auth as auth  # uporabnik jaz
 
-from Data.models import Clan, ClanDto, Knjiga, Avtor, BralnoSrecanje, Ocena, Izposoja, Rezervacija, KnjigaInAvtor, Udelezba, Zanr
+from Data.models import Clan, ClanDto, Knjiga, Avtor, BralnoSrecanje, Ocena, Izposoja, KnjigaInAvtor, Udelezba, Zanr
 
 DB_PORT = os.environ.get('POSTGRES_PORT', 5432)
 
@@ -322,19 +322,21 @@ class Repo:
         )
         self.conn.commit()
 
+
     # Izposojene knjige
     def dobi_izposojene_knjige(self, id_clana: int) -> list[Knjiga]:
         """
         Vrne seznam knjig, ki jih je član trenutno izposodil
-        (tj. kjer še ni potekel rok vračila).
+        (tj. kjer je status 'izposojeno').
         """
         self.cur.execute("""
             SELECT k.id_knjige, k.naslov, k.razpolozljivost, i.rok_vracila
-            FROM izposoja i
+            FROM izposoje i
             JOIN knjiga k ON i.id_knjige = k.id_knjige
             WHERE i.id_clana = %s
-            AND i.rok_vracila >= CURRENT_DATE
+            AND i.status = 'izposojeno'
         """, (id_clana,))
+        
         rows = self.cur.fetchall()
         knjige = [Knjiga.from_dict(dict(row)) for row in rows]
         for i, row in enumerate(rows):
@@ -342,12 +344,28 @@ class Repo:
         return knjige
 
 
+
     #vračilo 
     def dodaj_vracilo(self, id_clana: int, id_knjige: int):
-        self.cur.execute(
-            "INSERT INTO vracila (id_clana, id_knjige) VALUES (%s, %s)",
-            (id_clana, id_knjige)
-        )
+        try:
+            # Posodobimo status izposoje na 'vrnjeno'
+            self.cur.execute("""
+                UPDATE izposoja
+                SET status_izposoje = 'vrnjeno'
+                WHERE id_clana = %s AND id_knjige = %s AND status_izposoje = 'izposojeno'
+            """, (id_clana, id_knjige))
+            
+            # Preverimo, ali je bila katera vrstica dejansko posodobljena
+            if self.cur.rowcount == 0:
+                raise ValueError("Ta član nima te knjige izposojene.")
+            
+            # Commit, ker je posodobitev uspešna
+            self.conn.commit()
+        except Exception as e:
+            # Če pride do napake, rollback
+            self.conn.rollback()
+            raise e
+
 
 
 

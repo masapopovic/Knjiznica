@@ -55,17 +55,12 @@ CREATE TABLE izposoja (
     id_knjige INT NOT NULL,
     datum_izposoje DATE DEFAULT CURRENT_DATE,
     rok_vracila DATE GENERATED ALWAYS AS ((datum_izposoje + (INTERVAL '21 days'))::DATE) STORED,
+    status_izposoje TEXT NOT NULL CHECK (status_izposoje IN ('izposojeno', 'vrnjeno'))
     PRIMARY KEY (id_clana, id_knjige, datum_izposoje),
     FOREIGN KEY (id_clana) REFERENCES clan(id_clana),
     FOREIGN KEY (id_knjige) REFERENCES knjiga(id_knjige)
 );
 
-CREATE TABLE vracila (
-    id_vracila SERIAL PRIMARY KEY,
-    id_clana INT NOT NULL REFERENCES clan(id_clana),
-    id_knjige INT NOT NULL REFERENCES knjiga(id_knjige),
-    datum_vracila DATE NOT NULL DEFAULT CURRENT_DATE
-);
 
 
 CREATE TABLE knjiga_in_avtor (

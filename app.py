@@ -187,6 +187,7 @@ def izposodi_route(id_knjige):
         return template("sporocilo.html", sporocilo=str(e))
 
 
+
 # -------- Bralna srečanja --------
 @get("/srecanja")
 @cookie_required
@@ -256,6 +257,21 @@ def profil():
         izposojene_knjige=izposojene_knjige,
         prijavljena_srecanja=prijavljena_srecanja
     )
+
+@post("/vrni/<id_knjige:int>")
+@cookie_required
+def vrni_knjigo(id_knjige):
+    id_clana = int(request.get_cookie("id_clana", secret="skrivnost123"))
+
+    try:
+        knjiga_service.vrni_knjigo_po_id(id_clana, id_knjige)
+    except ValueError as e:
+        return f"Napaka: {str(e)}"
+    except Exception as e:
+        return f"Prišlo je do napake: {str(e)}"
+
+    redirect("/profil")
+
 
 
 @post("/odjava")

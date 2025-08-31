@@ -67,12 +67,22 @@ class KnjigaService:
 
 
     def vrni_knjigo_po_id(self, id_clana: int, id_knjige: int):
+        # Preverimo, ali knjiga obstaja
         knjiga = self.repo.dobi_knjigo_po_id(id_knjige)
         if not knjiga:
             raise ValueError("Knjiga s tem ID ne obstaja.")
 
+        # Poskusimo vrniti knjigo (repo bo poskrbel za commit/rollback)
         self.repo.dodaj_vracilo(id_clana, id_knjige)
-        self.repo.posodobi_razpolozljivost(id_knjige, 'na voljo')
+
+        # Posodobimo razpoložljivost knjige
+        try:
+            self.repo.posodobi_razpolozljivost(id_knjige, 'na voljo')
+            self.repo.conn.commit()
+        except Exception as e:
+            self.repo.conn.rollback()
+            raise e
+
 
     def dobi_avtorje_knjige(self, id_knjige: int):
         return self.repo.dobi_avtorje_knjige(id_knjige)

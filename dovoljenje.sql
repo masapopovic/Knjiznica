@@ -12,6 +12,7 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO javnost;
 SELECT * FROM knjiga;
 SELECT * FROM avtor;
 SELECT * FROM zanr;
+SELECT * FROM izposoja;
 SELECT * FROM knjiga_in_avtor;
 SELECT * FROM knjiga_in_zanr;
 
@@ -38,4 +39,9 @@ CHECK (role IN ('clan', 'admin'));
 ALTER TABLE clan
 DROP COLUMN role;
 
+ALTER TABLE izposoja
+ADD COLUMN status_izposoje TEXT NOT NULL DEFAULT 'izposojeno'
+CHECK (status_izposoje IN ('izposojeno', 'vrnjeno'));
+
+DROP TABLE izposoja CASCADE;
 
