@@ -106,17 +106,17 @@ class Repo:
         if row:
             return Clan.from_dict(dict(row))
         return None
-
+  
     
     def dobi_clana_po_uporabniskem_imenu(self, uporabnisko_ime: str) -> Optional[Clan]:
         self.cur.execute(
-            "SELECT * FROM clan WHERE uporabnisko_ime = %s",
+            "SELECT id_clana, ime, priimek, uporabnisko_ime, geslo AS password_hash, email, status_clana FROM clan WHERE uporabnisko_ime = %s",
             (uporabnisko_ime,)
         )
         row = self.cur.fetchone()
         if row:
             return Clan.from_dict(dict(row))
-        return None   
+        return None
 
 
     def dodaj_clana(self, clan: Clan) -> Clan:

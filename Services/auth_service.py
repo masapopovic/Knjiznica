@@ -57,8 +57,13 @@ class AuthService:
             raise ValueError("Uporabnik ne obstaja.")
 
         # Preveri geslo
+
+        print("DEBUG: type(password_hash) =", type(clan.password_hash))
+        print("DEBUG: password_hash =", clan.password_hash)
+
         if not bcrypt.checkpw(geslo.encode("utf-8"), clan.password_hash.encode("utf-8")):
             raise ValueError("Napačno geslo.")
+        
 
         # Če je vse ok, vrni ClanDto
         return ClanDto(
