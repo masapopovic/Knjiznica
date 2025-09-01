@@ -74,19 +74,18 @@ def registracija():
     except ValueError as e:
         return template("registracija.html", napaka=str(e))
 
-# -------- Homepage --------
+# -------- Homepage oz. iskalnik --------
 @get("/home")
 @cookie_required
 def home():
     id_clana = int(request.get_cookie("id_clana", secret="skrivnost123"))
-    clan = auth_service.repo.dobi_clana_po_id(id_clana)  # ali po id_clana
+    clan = auth_service.repo.dobi_clana_po_id(id_clana)  
     return template(
         "domaca_stran.html",
-        clan=clan,
-        knjige=[],               # tukaj se bo naložil rezultat iskanja prek POST
-        prihodnja_srecanja=srecanja_service.prikazi_prihodnja_srecanja()
+        clan=clan
     )
 
+# -------- rezultati iskanja --------
 @get("/rezultati")
 @cookie_required
 def rezultati():
@@ -122,20 +121,19 @@ def rezultati():
 @get("/knjiga/<id_knjige:int>")
 @cookie_required
 def prikazi_knjigo(id_knjige):
-    # ID prijavljenega člana iz piškotka
+
     id_clana = int(request.get_cookie("id_clana", secret="skrivnost123"))
 
-    # Pridobi podatke o knjigi po ID
     knjiga = knjiga_service.dobi_knjigo_po_id(id_knjige)
     if not knjiga:
         return "Knjiga s tem ID ne obstaja."
 
-    # Pridobi avtorje in žanre za knjigo
-    knjiga.avtorji = knjiga_service.dobi_avtorje_knjige(id_knjige)  # seznam objektov Avtor
-    knjiga.zanri = knjiga_service.dobi_zanre_knjige(id_knjige)      # seznam objektov Zanr
+   
+    knjiga.avtorji = knjiga_service.dobi_avtorje_knjige(id_knjige)  
+    knjiga.zanri = knjiga_service.dobi_zanre_knjige(id_knjige)     
 
-    # Pridobi vse ocene za to knjigo
-    ocene = ocena_service.ocene_po_id_knjige(id_knjige)  # vrne seznam objektov Ocena
+   
+    ocene = ocena_service.ocene_po_id_knjige(id_knjige) 
     povprecna_ocena = ocena_service.povprecna_ocena_knjige(id_knjige)
 
     return template(
@@ -151,10 +149,10 @@ def prikazi_knjigo(id_knjige):
 @post("/dodaj_oceno/<id_knjige:int>")
 @cookie_required
 def dodaj_oceno_route(id_knjige):
-    # ID prijavljenega člana iz piškotka
+    
     id_clana = int(request.get_cookie("id_clana", secret="skrivnost123"))
 
-    # Preberi vrednosti iz obrazca
+    
     ocena = request.forms.get("ocena")
     komentar = request.forms.get("komentar", "")
 
@@ -165,13 +163,13 @@ def dodaj_oceno_route(id_knjige):
     except (ValueError, TypeError):
         return "Neveljavna ocena. Vnesite število med 1 in 5."
 
-    # Pokliči service, ki doda oceno vsem izvodom
+    
     try:
         ocena_service.dodaj_oceno_vsem_izvodom(id_clana, id_knjige, ocena, komentar)
     except Exception as e:
         return f"Prišlo je do napake: {str(e)}"
 
-    # Po uspešnem dodajanju ocene preusmeri nazaj na stran knjige
+    #Po uspešnem dodajanju ocene preusmeri nazaj na stran knjige
     redirect(f"/knjiga/{id_knjige}?uspesno=1")
 
 
@@ -192,17 +190,15 @@ def izposodi_route(id_knjige):
 @get("/srecanja")
 @cookie_required
 def srecanja():
-    # ID prijavljenega člana iz piškotka
+    
     id_clana = int(request.get_cookie("id_clana", secret="skrivnost123"))
 
-    # Filtri iz query stringa
+    
     naziv = request.query.naziv or None
     datum = request.query.datum or None
 
-    # Pokliči service funkcijo, ki vrne filtrirana srečanja
     prihodnja = srecanja_service.isci_prihodnja_srecanja(naziv=naziv, datum=datum)
 
-    # Dodaj naslov knjige in dodatne informacije za vsako srečanje
     for s in prihodnja:
         knjiga = knjiga_service.dobi_knjigo_po_id(s.id_knjige)
         s.naslov_knjige = knjiga.naslov if knjiga else "Neznano"
@@ -237,16 +233,12 @@ def prijava_srecanja():
 def profil():
     id_clana = int(request.get_cookie("id_clana", secret="skrivnost123"))
 
-    # Trenutno prijavljen član
     clan = auth_service.repo.dobi_clana_po_id(id_clana)
 
-    # Trenutno izposojene knjige
     izposojene_knjige = knjiga_service.dobi_izposojene_knjige(id_clana)
 
-    # Prihodnja bralna srečanja, kjer je član prijavljen
     prijavljena_srecanja = srecanja_service.prihodnja_srecanja_po_clanu(id_clana)
 
-    # Dodaj naslov knjige za vsako srečanje
     for s in prijavljena_srecanja:
         knjiga = knjiga_service.dobi_knjigo_po_id(s.id_knjige)
         s.naslov_knjige = knjiga.naslov if knjiga else "Neznano"

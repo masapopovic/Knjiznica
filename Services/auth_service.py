@@ -39,7 +39,7 @@ class AuthService:
             status_clana=clan.status_clana
         )
     
-    def pridobi_clana_po_id(self, id_clana: int) -> ClanDto:
+    def dobi_clana_po_id(self, id_clana: int) -> ClanDto:
         clan = self.repo.dobi_clana_po_id(id_clana)
         if not clan:
             raise ValueError("Član s tem ID ne obstaja.")

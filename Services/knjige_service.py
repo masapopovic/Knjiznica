@@ -12,8 +12,6 @@ class KnjigaService:
     def dobi_knjigo_po_id(self, id_knjige: int):
         return self.repo.dobi_knjigo_po_id(id_knjige)
 
-    def prikazi_vse_knjige(self):
-        return self.repo.poisci_knjige()
     
     def dobi_zanre_knjige(self, id_knjige: int) -> list[str]:
         return self.repo.dobi_zanre_knjige(id_knjige)
@@ -36,8 +34,8 @@ class KnjigaService:
         )
 
         for k in knjige:
-            k.avtorji = self.repo.dobi_avtorje_knjige(k.id_knjige)  # seznam objektov Avtor
-            k.zanri = self.repo.dobi_zanre_knjige(k.id_knjige)      # seznam objektov Zanr
+            k.avtorji = self.repo.dobi_avtorje_knjige(k.id_knjige)  
+            k.zanri = self.repo.dobi_zanre_knjige(k.id_knjige)      
 
         return knjige
 
@@ -48,7 +46,7 @@ class KnjigaService:
 
     
     def izposodi_knjigo(self, id_clana: int, id_knjige: int):
-        # Najprej preveri status člana
+        #status člana
         clan = self.repo.dobi_clana_po_id(id_clana)
         if not clan:
             raise ValueError("Član s tem ID ne obstaja.")
@@ -56,26 +54,24 @@ class KnjigaService:
         if clan.status_clana != "aktiven":
             raise ValueError("Izposoja ni mogoča, ker član ni aktiven.")
         
-        # Preveri, če je knjiga na voljo
+        #preveri, če je knjiga na voljo
         knjiga = self.repo.dobi_knjigo_po_id(id_knjige)
         if not knjiga or knjiga.razpolozljivost != "na voljo":
             raise ValueError("Knjiga trenutno ni na voljo za izposojo.")
         
-        # Če so pogoji izpolnjeni, dodaj izposojo
+        #dodaj izposojo
         self.repo.dodaj_izposojo(id_clana, id_knjige)
         self.repo.posodobi_razpolozljivost(id_knjige, 'ni na voljo')
 
 
     def vrni_knjigo_po_id(self, id_clana: int, id_knjige: int):
-        # Preverimo, ali knjiga obstaja
+        #ali knjiga obstaja
         knjiga = self.repo.dobi_knjigo_po_id(id_knjige)
         if not knjiga:
             raise ValueError("Knjiga s tem ID ne obstaja.")
 
-        # Poskusimo vrniti knjigo (repo bo poskrbel za commit/rollback)
         self.repo.dodaj_vracilo(id_clana, id_knjige)
 
-        # Posodobimo razpoložljivost knjige
         try:
             self.repo.posodobi_razpolozljivost(id_knjige, 'na voljo')
             self.repo.conn.commit()

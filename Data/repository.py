@@ -95,6 +95,8 @@ class Repo:
 
         self.conn.commit()
 
+    #člani knjižnice
+
     def dobi_clana_po_id(self, id_clana: int) -> Optional[Clan]:
         self.cur.execute(
             "SELECT * FROM clan WHERE id_clana = %s",
@@ -173,8 +175,6 @@ class Repo:
         ))
         self.conn.commit()
 
-
-
         
     def povprecna_ocena_knjige(self, id_knjige: int) -> Optional[float]:
         self.cur.execute("""
@@ -184,6 +184,7 @@ class Repo:
         """, (id_knjige,))
         row = self.cur.fetchone()
         return float(row['povprecje']) if row and row['povprecje'] is not None else None
+
 
     def ocene_po_id_knjige(self, id_knjige: int) -> list[Ocena]:
         """
@@ -200,8 +201,8 @@ class Repo:
         return [Ocena.from_dict(dict(row)) for row in rows]
 
 
+    #knjige 
 
-    #knjige po žanrih, avtorjih, naslovih ter povp. oceni
     def poisci_knjige(
             self,
             naslov: str = None,
@@ -211,7 +212,7 @@ class Repo:
         ) -> list[Knjiga]:
         """
         Išče knjige glede na naslov, seznam avtorjev, seznam žanrov in minimalno povprečno oceno.
-        Če so podani avtorji ali žanri, vrne samo knjige, ki vsebujejo vse te avtorje in/ali vse te žanre.
+        Če je podano več avtorjeb ali več žanrov vrne tiste knjige, ki vsebujejo vse te avtorje in/ali vse te žanre.
         """
         query = """
             SELECT DISTINCT k.id_knjige, k.naslov, k.razpolozljivost
@@ -323,7 +324,6 @@ class Repo:
         self.conn.commit()
 
 
-    # Izposojene knjige
     def dobi_izposojene_knjige(self, id_clana: int) -> list[Knjiga]:
         """
         Vrne seznam knjig, ki jih je član trenutno izposodil
@@ -345,7 +345,7 @@ class Repo:
             return knjige
 
         except Exception as e:
-            self.conn.rollback()  # 🟢 to resetira "failed transaction"
+            self.conn.rollback() 
             raise e
 
 
@@ -380,9 +380,6 @@ class Repo:
     #Bralno srecanje
 
     def get_srecanje_po_id(self, id_srecanja: int):
-        """
-        Vrne podatke o bralnem srečanju glede na id_srecanja.
-        """
         self.cur.execute("""
             SELECT 
                 id_srecanja,
@@ -396,7 +393,7 @@ class Repo:
         row = self.cur.fetchone()
         return dict(row) if row else None
 
-    # Poišči srečanje po datumu in nazivu
+    #Poišči srečanje po datumu in nazivu
     def isci_prihodnja_srecanja(self, naziv: str = None, datum: str = None) -> list[BralnoSrecanje]:
         query = """
             SELECT * FROM bralno_srecanje
@@ -419,7 +416,7 @@ class Repo:
         return [BralnoSrecanje.from_dict(dict(row)) for row in rows]
 
 
-    # Preveri, ali je član že prijavljen
+    #preveri, ali je član že prijavljen
     def preveri_udelezbo(self, id_clana: int, id_srecanja: int):
         self.cur.execute(
             "SELECT 1 FROM udelezba WHERE id_clana = %s AND id_srecanja = %s",
@@ -428,7 +425,6 @@ class Repo:
         return self.cur.fetchone() is not None
 
 
-    # Vstavi prijavo člana
     def dodaj_udelezbo(self, id_clana: int, id_srecanja: int):
         self.cur.execute(
             "INSERT INTO udelezba (id_clana, id_srecanja) VALUES (%s, %s)",
@@ -436,11 +432,8 @@ class Repo:
         )
         self.conn.commit()
 
-    #prihodnja srečanja
+
     def prikazi_prihodnja_srecanja(self) -> List[BralnoSrecanje]:
-        """
-        Vrne seznam vseh bralnih srečanj, ki še niso potekla.
-        """
         self.cur.execute("""
             SELECT 
                 id_srecanja,
@@ -455,10 +448,8 @@ class Repo:
         rows = self.cur.fetchall()
         return [BralnoSrecanje.from_dict(dict(row)) for row in rows]
     
+
     def prihodnja_srecanja_po_clanu(self, id_clana: int) -> list[BralnoSrecanje]:
-        """
-        Vrne seznam vseh prihodnjih bralnih srečanj, na katera je prijavljen določen član.
-        """
         self.cur.execute("""
             SELECT bs.id_srecanja, bs.prostor, bs.datum, bs.naziv_in_opis, bs.id_knjige
             FROM bralno_srecanje bs

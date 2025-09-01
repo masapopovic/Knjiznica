@@ -86,3 +86,7 @@ CREATE TABLE knjiga_in_zanr (
     FOREIGN KEY (id_knjige) REFERENCES knjiga(id_knjige),
     FOREIGN KEY (id_zanra) REFERENCES zanr(id_zanra)
 );
+
+
+
+
