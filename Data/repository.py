@@ -329,42 +329,50 @@ class Repo:
         Vrne seznam knjig, ki jih je član trenutno izposodil
         (tj. kjer je status 'izposojeno').
         """
-        self.cur.execute("""
-            SELECT k.id_knjige, k.naslov, k.razpolozljivost, i.rok_vracila
-            FROM izposoje i
-            JOIN knjiga k ON i.id_knjige = k.id_knjige
-            WHERE i.id_clana = %s
-            AND i.status = 'izposojeno'
-        """, (id_clana,))
-        
-        rows = self.cur.fetchall()
-        knjige = [Knjiga.from_dict(dict(row)) for row in rows]
-        for i, row in enumerate(rows):
-            knjige[i].rok_vracila = row['rok_vracila']
-        return knjige
+        try:
+            self.cur.execute("""
+                SELECT k.id_knjige, k.naslov, k.razpolozljivost, i.rok_vracila
+                FROM izposoja i
+                JOIN knjiga k ON i.id_knjige = k.id_knjige
+                WHERE i.id_clana = %s
+                AND i.status_izposoje = 'izposojeno'
+            """, (id_clana,))
+            
+            rows = self.cur.fetchall()
+            knjige = [Knjiga.from_dict(dict(row)) for row in rows]
+            for i, row in enumerate(rows):
+                knjige[i].rok_vracila = row['rok_vracila']
+            return knjige
+
+        except Exception as e:
+            self.conn.rollback()  # 🟢 to resetira "failed transaction"
+            raise e
 
 
 
     #vračilo 
     def dodaj_vracilo(self, id_clana: int, id_knjige: int):
         try:
-            # Posodobimo status izposoje na 'vrnjeno'
+            # Posodobi status izposoje na 'vrnjeno'
             self.cur.execute("""
                 UPDATE izposoja
                 SET status_izposoje = 'vrnjeno'
                 WHERE id_clana = %s AND id_knjige = %s AND status_izposoje = 'izposojeno'
             """, (id_clana, id_knjige))
-            
-            # Preverimo, ali je bila katera vrstica dejansko posodobljena
-            if self.cur.rowcount == 0:
-                raise ValueError("Ta član nima te knjige izposojene.")
-            
-            # Commit, ker je posodobitev uspešna
-            self.conn.commit()
+
+            # Commit samo, če je bila katera vrstica posodobljena
+            if self.cur.rowcount > 0:
+                self.conn.commit()
+            else:
+                # Ni bilo vrstic za posodobiti → samo obvestilo, brez rollbacka
+                print(f"Član {id_clana} nima knjige {id_knjige} izposojene.")
+                self.conn.rollback()  # sprosti morebitno prejšnjo neuspešno transakcijo
+
         except Exception as e:
-            # Če pride do napake, rollback
+            # Rollback ob dejanski SQL napaki
             self.conn.rollback()
             raise e
+
 
 
 

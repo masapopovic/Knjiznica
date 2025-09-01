@@ -12,7 +12,7 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO javnost;
 SELECT * FROM knjiga;
 SELECT * FROM avtor;
 SELECT * FROM zanr;
-SELECT * FROM izposoja;
+SELECT * FROM vracila;
 SELECT * FROM knjiga_in_avtor;
 SELECT * FROM knjiga_in_zanr;
 
@@ -43,5 +43,27 @@ ALTER TABLE izposoja
 ADD COLUMN status_izposoje TEXT NOT NULL DEFAULT 'izposojeno'
 CHECK (status_izposoje IN ('izposojeno', 'vrnjeno'));
 
-DROP TABLE izposoja CASCADE;
+DROP TABLE vracila CASCADE;
+
+ALTER TABLE izposoja
+ADD COLUMN status_izposoje TEXT DEFAULT 'izposojeno';
+
+ALTER TABLE izposoja
+ADD CONSTRAINT status_izposoje_check
+CHECK (status_izposoje IN ('izposojeno', 'vrnjeno'));
+
+
+SELECT pg_terminate_backend(pid)
+FROM pg_stat_activity
+WHERE datname = 'opb2025_popovma' AND pid <> pg_backend_pid();
+
+SELECT * FROM izposoja;
+SELECT * FROM vracila;
+
+DROP TABLE vracila CASCADE;
+
+SELECT pid, usename, query, state
+FROM pg_stat_activity
+WHERE datname = 'opb2025_popovma';
+
 

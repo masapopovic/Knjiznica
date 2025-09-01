@@ -96,8 +96,24 @@ label { font-size:0.95rem; color:var(--muted); }
 .btn-success { background:var(--accent-2); color:white; }
 .btn-danger { background:var(--danger); color:white; }
 
+/* 🔹 nova varianta za manjše gumbe (npr. "Vrni knjigo") */
+.btn-small {
+  padding:2px 8px;        /* manjši padding */
+  font-size:0.8rem;       /* manjša pisava */
+  border-radius:5px;      /* malo manj zaokrožen */
+  font-weight:600;
+  line-height:1.2;
+  width:auto;             /* naj se prilagodi besedilu */
+}
+
 /* small button groups */
-.gumbi { margin-top:8px; display:flex; gap:8px; flex-wrap:wrap; }
+.gumbi {
+  margin-top:8px;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
 
 /* --- specific page containers --- */
 .welcome, .auth-container, .home-container, .knjiga-container, .srecanja-container, .profil-container {
